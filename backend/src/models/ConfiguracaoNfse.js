@@ -36,6 +36,14 @@ defineModel({
     defaultCountryCode: fields.string({ label: "Código do país padrão", default: "1058" }),
     allowIssuanceWithoutAddress: fields.boolean({ label: "Permitir emissão sem dados de endereço", default: false }),
 
+    automatizarAprovacao: fields.boolean({ label: "Automatizar aprovação", default: false }),
+    automatizarSincronizacaoCliente: fields.boolean({ label: "Automatizar sincronização do cliente", default: false }),
+    automatizarCriacaoOs: fields.boolean({ label: "Automatizar criação da OS", default: false }),
+    automatizarGeracaoNf: fields.boolean({ label: "Automatizar geração da NFS-e", default: false }),
+    automatizarRetornoFaturamento: fields.boolean({ label: "Automatizar retorno do faturamento", default: false }),
+    automatizarBaixaFinanceira: fields.boolean({ label: "Automatizar baixa financeira", default: false }),
+    automatizarNotificacaoPlataforma: fields.boolean({ label: "Automatizar notificação da Plataforma", default: false }),
+
     callbackUrl: fields.string({ label: "URL de callback da Plataforma" }),
     callbackAuthMode: fields.enum(["none", "bearer", "hmac-sha256"], { label: "Autenticação do callback", default: "hmac-sha256" }),
     callbackSecretEnv: fields.string({ label: "Variável de ambiente do segredo do callback", default: "TACA_CALLBACK_SECRET" }),

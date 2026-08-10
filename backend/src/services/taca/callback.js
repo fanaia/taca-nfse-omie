@@ -2,6 +2,7 @@
 
 const { buildOrderCallback, buildReversalCallback, signHmac } = require("./callbackContract");
 const { getConfig } = require("./config");
+const { ORDER_STAGE, REVERSAL_STAGE, REVERSAL_STATUS } = require("./constants");
 const { models } = require("./runtime");
 
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
@@ -52,11 +53,15 @@ async function deliver(kind, id, context = {}) {
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       const result = await postOnce(config.callbackUrl, body, config);
+      const completion = kind === "reversal"
+        ? { etapa: REVERSAL_STAGE.COMPLETED, status: REVERSAL_STATUS.COMPLETED, completedAt: new Date() }
+        : { etapa: ORDER_STAGE.COMPLETED, completedAt: new Date() };
       const updated = await Model.findByIdAndUpdate(record._id, { $set: {
         callbackStatus: "SENT", callbackAttempts: Number(record.callbackAttempts || 0) + attempt,
         callbackLastHttpStatus: result.httpStatus, callbackLastError: "", callbackSentAt: new Date(),
+        ...completion,
       } }, { new: true });
-      const output = { id: String(record._id), kind, httpStatus: result.httpStatus, status: updated?.callbackStatus };
+      const output = { id: String(record._id), kind, httpStatus: result.httpStatus, status: updated?.callbackStatus, stage: updated?.etapa };
       context.recordItem?.(output);
       return output;
     } catch (error) {

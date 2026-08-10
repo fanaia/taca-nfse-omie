@@ -33,7 +33,7 @@ test("public API contract stays English and protected by Core private routes", (
   assert.doesNotMatch(source, /\/pedidos|\/estorno\b/);
 });
 
-test("NFS-e configuration is a singleton custom form instead of a CRUD datagrid", () => {
+test("NFS-e configuration is a singleton custom form with process automation", () => {
   const ui = JSON.parse(read("frontend/central.ui.json"));
   assert.equal(ui.collections.some((collection) => collection.model === "ConfiguracaoNfse"), false);
   const page = ui.pages.find((item) => item.id === "configuracao-nfse");
@@ -43,19 +43,59 @@ test("NFS-e configuration is a singleton custom form instead of a CRUD datagrid"
   const main = read("frontend/src/main.tsx");
   assert.match(main, /ConfiguracaoNfsePage/);
   const form = read("frontend/src/ConfiguracaoNfsePage.tsx");
-  for (const tab of ["Geral", "Endereço padrão", "API"]) assert.match(form, new RegExp(tab));
+  for (const tab of ["Geral", "Endereço padrão", "Automação", "API"]) assert.match(form, new RegExp(tab));
+  assert.match(form, /Todas as etapas começam em modo manual/);
   assert.match(form, /Sincronizar listas Omie/);
+});
+
+test("Pedidos and estornos are exposed as process pipelines", () => {
+  const ui = JSON.parse(read("frontend/central.ui.json"));
+  assert.equal(ui.collections.some((collection) => ["PedidoNfse", "EstornoTaca"].includes(collection.model)), false);
+  const order = ui.pipelines.find((pipeline) => pipeline.model === "PedidoNfse");
+  const reversal = ui.pipelines.find((pipeline) => pipeline.model === "EstornoTaca");
+  assert.ok(order);
+  assert.ok(reversal);
+  assert.equal(order.stageField, "etapa");
+  assert.equal(reversal.stageField, "etapa");
+  assert.deepEqual(order.stages.map((stage) => stage.id), [
+    "Aprovação",
+    "Sinc cliente (Omie)",
+    "Criar OS (Omie)",
+    "Gerar NF (Omie)",
+    "Aguardando retorno faturamento (Omie)",
+    "Baixa financeira",
+    "Notificar plataforma",
+    "Concluído",
+  ]);
+  assert.deepEqual(reversal.stages.map((stage) => stage.id), ["Requisição", "Cancelar", "Notificar plataforma", "Concluído"]);
+  assert.equal(order.defaultActions, false);
+  assert.equal(reversal.defaultActions, false);
+  assert.equal(reversal.ticketActions.some((action) => /automat/i.test(action.id || action.label)), false);
+});
+
+test("all order process automations default to manual", () => {
+  const config = read("backend/src/services/taca/config.js");
+  for (const field of [
+    "automatizarAprovacao",
+    "automatizarSincronizacaoCliente",
+    "automatizarCriacaoOs",
+    "automatizarGeracaoNf",
+    "automatizarRetornoFaturamento",
+    "automatizarBaixaFinanceira",
+    "automatizarNotificacaoPlataforma",
+  ]) {
+    assert.match(config, new RegExp(`${field}: false`));
+  }
+  const workflow = read("backend/src/services/taca/workflow.js");
+  assert.match(workflow, /TACA_PROCESSAR_ETAPA_PEDIDO/);
+  assert.match(workflow, /legacy-full-flow-disabled-use-process-pipeline/);
 });
 
 test("Omie reference lists are declared and selectable configuration uses refs", () => {
   const mapping = read("backend/src/mappings/omie.js");
-  for (const call of ["ListarCadastroServico", "ListarCategorias", "ListarContasCorrentes", "ListarFormasPagVendas", "PesquisarCidades"]) {
-    assert.match(mapping, new RegExp(call));
-  }
+  for (const call of ["ListarCadastroServico", "ListarCategorias", "ListarContasCorrentes", "ListarFormasPagVendas", "PesquisarCidades"]) assert.match(mapping, new RegExp(call));
   const model = read("backend/src/models/ConfiguracaoNfse.js");
-  for (const ref of ["ServicoOmie", "CategoriaOmie", "ContaCorrenteOmie", "CondicaoPagamentoOmie", "CidadeOmie"]) {
-    assert.match(model, new RegExp(`fields\\.ref\\("${ref}"`));
-  }
+  for (const ref of ["ServicoOmie", "CategoriaOmie", "ContaCorrenteOmie", "CondicaoPagamentoOmie", "CidadeOmie"]) assert.match(model, new RegExp(`fields\\.ref\\("${ref}"`));
 });
 
 test("implementation never calls automatic Omie cancellation", () => {
