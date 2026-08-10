@@ -37,7 +37,18 @@ jobs:
               --write-out '%{http_code}' \
               "$API_BASE/taca/v1/openapi.json" || true)"
 
-            if [[ "$docs_status" == "200" && "$init_status" == "200" && "$openapi_status" == "200" ]]; then
+            version_ready=false
+            if [[ "$docs_status" == "200" && "$init_status" == "200" && "$openapi_status" == "200" ]] \
+              && grep -q 'swagger-ui-bundle.js' "$RUNNER_TEMP/swagger.html" \
+              && grep -q '/api/taca/v1/docs-init.js' "$RUNNER_TEMP/swagger.html" \
+              && grep -q 'SwaggerUIBundle' "$RUNNER_TEMP/docs-init.js" \
+              && grep -q 'preauthorizeApiKey("bearerAuth", token)' "$RUNNER_TEMP/docs-init.js" \
+              && grep -q '/api/auth/autenticar' "$RUNNER_TEMP/docs-init.js" \
+              && grep -qi '^content-security-policy:.*script-src' "$RUNNER_TEMP/swagger.headers"; then
+              version_ready=true
+            fi
+
+            if [[ "$version_ready" == "true" ]]; then
               node - "$RUNNER_TEMP/openapi.json" <<'NODE'
           const fs = require('node:fs');
           const spec = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
@@ -45,12 +56,6 @@ jobs:
           if (!spec.paths?.['/api/auth/autenticar']?.post) throw new Error('Autenticação ausente no OpenAPI.');
           if (!spec.paths?.['/api/taca/v1/orders']?.post) throw new Error('Endpoint de pedidos ausente no OpenAPI.');
           NODE
-              grep -q 'swagger-ui-bundle.js' "$RUNNER_TEMP/swagger.html"
-              grep -q '/api/taca/v1/docs-init.js' "$RUNNER_TEMP/swagger.html"
-              grep -q 'SwaggerUIBundle' "$RUNNER_TEMP/docs-init.js"
-              grep -q 'preauthorizeApiKey("bearerAuth", token)' "$RUNNER_TEMP/docs-init.js"
-              grep -q '/api/auth/autenticar' "$RUNNER_TEMP/docs-init.js"
-              grep -qi '^content-security-policy:.*script-src' "$RUNNER_TEMP/swagger.headers"
 
               if grep -qi '^content-security-policy:.*script-src[^;]*unsafe-inline' "$RUNNER_TEMP/swagger.headers"; then
                 echo "CSP do Swagger não deve liberar unsafe-inline para scripts." >&2
@@ -68,9 +73,9 @@ jobs:
               exit 0
             fi
 
-            echo "Tentativa $attempt/60: docs=$docs_status init=$init_status openapi=$openapi_status"
+            echo "Tentativa $attempt/60: docs=$docs_status init=$init_status openapi=$openapi_status; aguardando versão nova"
             sleep 5
           done
 
-          echo "Swagger/OpenAPI não estão disponíveis no host público da Central." >&2
+          echo "Swagger/OpenAPI da versão esperada não ficaram disponíveis no host público da Central." >&2
           exit 1
