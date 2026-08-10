@@ -4,7 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { buildCustomerPayload, buildServiceOrderPayload, normalizeFiscal } = require("../src/services/taca/omiePayload");
 
-test("builds UpsertClienteCpfCnpj payload from effective address", () => {
+test("builds UpsertClienteCpfCnpj payload from effective address without integration code", () => {
   const payload = buildCustomerPayload({
     documentoNormalizado: "12345678000190", customerLegalName: "Cliente Ltda", customerTradeName: "Cliente",
     customerEmail: "fiscal@example.com", simpleNationalTaxpayer: false,
@@ -14,6 +14,7 @@ test("builds UpsertClienteCpfCnpj payload from effective address", () => {
   assert.equal(payload.endereco_numero, "10");
   assert.equal(payload.cidade, "3550308");
   assert.equal(payload.optante_simples_nacional, "N");
+  assert.equal(payload.codigo_cliente_integracao, undefined);
 });
 
 test("builds service order with one service unit and integration code", () => {
