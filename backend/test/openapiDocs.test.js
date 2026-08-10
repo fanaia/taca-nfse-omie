@@ -30,3 +30,15 @@ test("Swagger UI and OpenAPI JSON are public backend routes behind the /api deli
   assert.match(routeSource, /url: "\/api\/taca\/v1\/openapi\.json"/);
   assert.match(routeSource, /swagger-ui-dist@5/);
 });
+
+test("Swagger bootstrap is same-origin and compatible with the restrictive CSP", () => {
+  const routeSource = fs.readFileSync(path.join(__dirname, "../src/routes/tacaDocs.js"), "utf8");
+
+  assert.match(routeSource, /router\.public\.get\("\/docs-init\.js"/);
+  assert.match(routeSource, /<script src="\/api\/taca\/v1\/docs-init\.js"><\/script>/);
+  assert.doesNotMatch(routeSource, /<script>\s*window\.ui\s*=\s*SwaggerUIBundle/);
+  assert.match(routeSource, /script-src 'self' https:\/\/cdn\.jsdelivr\.net/);
+  assert.doesNotMatch(routeSource, /script-src[^\n]*'unsafe-inline'/);
+  assert.match(routeSource, /object-src 'none'/);
+  assert.match(routeSource, /frame-ancestors 'none'/);
+});
