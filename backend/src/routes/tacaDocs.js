@@ -10,7 +10,24 @@ const SWAGGER_CSP = [
   "img-src 'self' data: https:",
   "font-src 'self' data: https://cdn.jsdelivr.net",
   "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
 ].join("; ");
+
+function swaggerInitScript() {
+  return `"use strict";
+window.ui = SwaggerUIBundle({
+  url: "/api/taca/v1/openapi.json",
+  dom_id: "#swagger-ui",
+  deepLinking: true,
+  persistAuthorization: true,
+  displayRequestDuration: true,
+  filter: true,
+  tryItOutEnabled: true
+});
+`;
+}
 
 function swaggerHtml() {
   return `<!doctype html>
@@ -30,17 +47,7 @@ function swaggerHtml() {
 <body>
   <div id="swagger-ui"></div>
   <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-  <script>
-    window.ui = SwaggerUIBundle({
-      url: "/api/taca/v1/openapi.json",
-      dom_id: "#swagger-ui",
-      deepLinking: true,
-      persistAuthorization: true,
-      displayRequestDuration: true,
-      filter: true,
-      tryItOutEnabled: true
-    });
-  </script>
+  <script src="/api/taca/v1/docs-init.js"></script>
 </body>
 </html>`;
 }
@@ -53,6 +60,11 @@ defineRoutes("/taca/v1", (router) => {
     res.status(200).json(openapi);
   });
 
+  router.public.get("/docs-init.js", async (_req, res) => {
+    res.set("Cache-Control", "public, max-age=300");
+    res.type("application/javascript").status(200).send(swaggerInitScript());
+  });
+
   router.public.get("/docs", async (_req, res) => {
     res.set("Cache-Control", "public, max-age=300");
     res.set("Content-Security-Policy", SWAGGER_CSP);
@@ -60,4 +72,4 @@ defineRoutes("/taca/v1", (router) => {
   });
 });
 
-module.exports = { SWAGGER_CSP, swaggerHtml };
+module.exports = { SWAGGER_CSP, swaggerHtml, swaggerInitScript };
