@@ -15,9 +15,9 @@ jobs:
     needs: request
     runs-on: ubuntu-latest
     steps:
-      - name: Validar Swagger e OpenAPI públicos
+      - name: Validar Swagger e OpenAPI públicos no host da Central
         env:
-          API_BASE: https://api-taca-nfse-omie-dev.central.oondemand.online/api
+          API_BASE: https://taca-nfse-omie-dev.central.oondemand.online/api
         shell: bash
         run: |
           set -euo pipefail
@@ -50,5 +50,5 @@ jobs:
             sleep 5
           done
 
-          echo "Swagger/OpenAPI não ficaram disponíveis após a publicação." >&2
+          echo "Swagger/OpenAPI não estão disponíveis no host público da Central." >&2
           exit 1
