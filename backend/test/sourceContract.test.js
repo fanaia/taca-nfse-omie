@@ -77,7 +77,34 @@ test("Pedidos and estornos are exposed as process pipelines", () => {
   assert.deepEqual(reversal.stages.map((stage) => stage.id), ["Requisição", "Cancelar", "Notificar plataforma", "Concluído"]);
   assert.equal(order.defaultActions, false);
   assert.equal(reversal.defaultActions, false);
+
+  assert.equal(order.ticketActions.length, 1);
+  const approve = order.ticketActions[0];
+  assert.equal(approve.id, "aprovar-etapa");
+  assert.equal(approve.label, "Aprovar");
+  assert.equal(approve.type, "apiAction");
+  assert.equal(approve.method, "POST");
+  assert.equal(approve.endpoint, "/api/taca/ops/orders/:id/advance");
+  assert.deepEqual(approve.hiddenWhen, { field: "etapa", equals: "Concluído" });
+  assert.equal(Object.prototype.hasOwnProperty.call(approve, "visibleWhen"), false);
+
   assert.equal(reversal.ticketActions.some((action) => /automat/i.test(action.id || action.label)), false);
+});
+
+test("the single order approval delegates execution to the current process stage", () => {
+  const workflow = read("backend/src/services/taca/workflow.js");
+  assert.match(workflow, /switch \(order\.etapa\)/);
+  for (const stage of [
+    "ORDER_STAGE.APPROVAL",
+    "ORDER_STAGE.CUSTOMER_SYNC",
+    "ORDER_STAGE.CREATE_SERVICE_ORDER",
+    "ORDER_STAGE.GENERATE_INVOICE",
+    "ORDER_STAGE.AWAIT_BILLING_RETURN",
+    "ORDER_STAGE.FINANCIAL_SETTLEMENT",
+    "ORDER_STAGE.NOTIFY_PLATFORM",
+  ]) {
+    assert.match(workflow, new RegExp(`case ${stage.replace(".", "\\.")}:`));
+  }
 });
 
 test("all order process automations default to manual", () => {

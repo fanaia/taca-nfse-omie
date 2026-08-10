@@ -175,76 +175,18 @@
       "defaultActions": false,
       "ticketActions": [
         {
-          "id": "aprovar",
+          "id": "aprovar-etapa",
           "label": "Aprovar",
           "type": "apiAction",
           "method": "POST",
           "endpoint": "/api/taca/ops/orders/:id/advance",
-          "visibleWhen": { "field": "etapa", "equals": "Aprovação" },
-          "confirm": { "title": "Aprovar pedido?", "description": "O pedido seguirá para sincronização do cliente no Omie." },
+          "hiddenWhen": { "field": "etapa", "equals": "Concluído" },
+          "confirm": {
+            "title": "Aprovar etapa atual?",
+            "description": "A Central executará a ação correspondente à etapa atual do pedido."
+          },
           "refresh": ["all"],
           "tone": "success"
-        },
-        {
-          "id": "sincronizar-cliente",
-          "label": "Sincronizar cliente",
-          "type": "apiAction",
-          "method": "POST",
-          "endpoint": "/api/taca/ops/orders/:id/advance",
-          "visibleWhen": { "field": "etapa", "equals": "Sinc cliente (Omie)" },
-          "confirm": { "title": "Sincronizar cliente no Omie?", "description": "A operação utiliza o CPF/CNPJ como chave e reaproveita o vínculo Omie já persistido quando existir." },
-          "refresh": ["all"]
-        },
-        {
-          "id": "criar-os",
-          "label": "Criar OS",
-          "type": "apiAction",
-          "method": "POST",
-          "endpoint": "/api/taca/ops/orders/:id/advance",
-          "visibleWhen": { "field": "etapa", "equals": "Criar OS (Omie)" },
-          "confirm": { "title": "Criar Ordem de Serviço?", "description": "A Central criará ou reconciliará a OS no Omie de forma idempotente." },
-          "refresh": ["all"]
-        },
-        {
-          "id": "gerar-nf",
-          "label": "Gerar NF",
-          "type": "apiAction",
-          "method": "POST",
-          "endpoint": "/api/taca/ops/orders/:id/advance",
-          "visibleWhen": { "field": "etapa", "equals": "Gerar NF (Omie)" },
-          "confirm": { "title": "Faturar a OS no Omie?", "description": "A Central solicitará o faturamento; a emissão só será considerada confirmada após o retorno fiscal." },
-          "refresh": ["all"]
-        },
-        {
-          "id": "verificar-faturamento",
-          "label": "Verificar faturamento",
-          "type": "apiAction",
-          "method": "POST",
-          "endpoint": "/api/taca/ops/orders/:id/advance",
-          "visibleWhen": { "field": "etapa", "equals": "Aguardando retorno faturamento (Omie)" },
-          "confirm": { "title": "Verificar retorno do faturamento?", "description": "A Central consultará a OS no Omie e atualizará a situação fiscal da NFS-e." },
-          "refresh": ["all"]
-        },
-        {
-          "id": "confirmar-baixa-financeira",
-          "label": "Confirmar baixa financeira",
-          "type": "apiAction",
-          "method": "POST",
-          "endpoint": "/api/taca/ops/orders/:id/advance",
-          "visibleWhen": { "field": "etapa", "equals": "Baixa financeira" },
-          "confirm": { "title": "Confirmar baixa financeira?", "description": "A Central registrará a confirmação da baixa e seguirá para a notificação da Plataforma." },
-          "refresh": ["all"],
-          "tone": "success"
-        },
-        {
-          "id": "notificar-plataforma",
-          "label": "Notificar plataforma",
-          "type": "apiAction",
-          "method": "POST",
-          "endpoint": "/api/taca/ops/orders/:id/advance",
-          "visibleWhen": { "field": "etapa", "equals": "Notificar plataforma" },
-          "confirm": { "title": "Notificar a Plataforma?", "description": "O callback será enviado de forma assíncrona. A etapa só será concluída após resposta HTTP de sucesso." },
-          "refresh": ["all"]
         }
       ],
       "ticketModal": {
