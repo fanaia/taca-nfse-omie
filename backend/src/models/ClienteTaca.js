@@ -18,6 +18,7 @@ defineModel({
     enderecoEfetivoJson: fields.string({ label: "Endereço efetivo" }),
     origemEnderecoJson: fields.string({ label: "Origem do endereço" }),
     sincronizadoEm: fields.date({ label: "Sincronizado no Omie em" }),
+    sincronizadoFingerprint: fields.string({ label: "Fingerprint dos dados sincronizados" }),
     ultimoErro: fields.string({ label: "Último erro" }),
   },
   crud: { enabled: true, roles: { write: ["admin", "desenvolvedor"] }, populateRefs: true },

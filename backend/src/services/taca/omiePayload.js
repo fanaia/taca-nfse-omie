@@ -10,7 +10,6 @@ function formatDateBr(date = new Date()) {
 function buildCustomerPayload(order, config) {
   const address = order.address || {};
   const payload = {
-    codigo_cliente_integracao: `TACA-${order.documentoNormalizado}`.slice(0, 60),
     cnpj_cpf: order.documentoNormalizado,
     razao_social: order.customerLegalName,
     nome_fantasia: order.customerTradeName || order.customerLegalName,

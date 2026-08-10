@@ -2,8 +2,9 @@
 
 const { defineOmieMapping } = require("@oondemand/oon-core-back");
 const { handleOrderCallback, handleReversalCallback } = require("../services/taca/callback");
+const { processOrderStage } = require("../services/taca/orderStageHandler");
 const { mapCategory, mapCity, mapCurrentAccount, mapPaymentTerm, mapService, syncReferenceList } = require("../services/taca/referenceData");
-const { handleFiscalReconcile, handleOmieWebhook, legacyProcessOrder, processOrderStage } = require("../services/taca/workflow");
+const { handleFiscalReconcile, handleOmieWebhook, legacyProcessOrder } = require("../services/taca/workflow");
 
 function webhookAction() {
   return {
@@ -36,7 +37,7 @@ defineOmieMapping("taca-nfse-omie", {
     "list-current-accounts": { label: "Listar contas correntes", endpoint: "geral/contacorrente/", call: "ListarContasCorrentes", param: [{ pagina: "$input.page", registros_por_pagina: "$input.pageSize", apenas_importado_api: "N" }], maxAttempts: 1, pagination: { itemsPath: "ListarContasCorrentes", totalPagesPath: "total_de_paginas", pageSize: 100 } },
     "list-payment-terms": { label: "Listar condições de pagamento", endpoint: "produtos/formaspagvendas/", call: "ListarFormasPagVendas", param: [{ pagina: "$input.page", registros_por_pagina: "$input.pageSize" }], maxAttempts: 1, pagination: { itemsPath: "cadastros", totalPagesPath: "total_de_paginas", pageSize: 100 } },
     "list-cities": { label: "Listar cidades", endpoint: "geral/cidades/", call: "PesquisarCidades", param: [{ pagina: "$input.page", registros_por_pagina: "$input.pageSize" }], maxAttempts: 1, pagination: { itemsPath: "lista_cidades", totalPagesPath: "total_de_paginas", pageSize: 100 } },
-    "upsert-customer-by-document": { label: "Criar/recuperar cliente por CPF/CNPJ", endpoint: "geral/clientes/", call: "UpsertClienteCpfCnpj", param: { $path: "$input.param" }, maxAttempts: 1 },
+    "upsert-customer-by-document": { label: "Criar/atualizar cliente por CPF/CNPJ", endpoint: "geral/clientes/", call: "UpsertClienteCpfCnpj", param: { $path: "$input.param" }, maxAttempts: 1 },
     "consult-service-order": { label: "Consultar Ordem de Serviço", endpoint: "servicos/os/", call: "ConsultarOS", param: { $path: "$input.param" }, maxAttempts: 1 },
     "include-service-order": { label: "Incluir Ordem de Serviço", endpoint: "servicos/os/", call: "IncluirOS", param: { $path: "$input.param" }, maxAttempts: 1 },
     "bill-service-order": { label: "Faturar Ordem de Serviço", endpoint: "servicos/osp/", call: "FaturarOS", param: { $path: "$input.param" }, maxAttempts: 1 },
