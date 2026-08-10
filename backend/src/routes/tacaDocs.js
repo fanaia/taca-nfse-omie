@@ -17,15 +17,67 @@ const SWAGGER_CSP = [
 
 function swaggerInitScript() {
   return `"use strict";
-window.ui = SwaggerUIBundle({
-  url: "/api/taca/v1/openapi.json",
-  dom_id: "#swagger-ui",
-  deepLinking: true,
-  persistAuthorization: true,
-  displayRequestDuration: true,
-  filter: true,
-  tryItOutEnabled: true
-});
+(() => {
+  let ui;
+
+  function parseResponseBody(response) {
+    const candidate = response?.obj ?? response?.body ?? response?.data;
+    if (candidate && typeof candidate === "object") return candidate;
+
+    for (const value of [candidate, response?.text]) {
+      if (typeof value !== "string" || !value.trim()) continue;
+      try {
+        return JSON.parse(value);
+      } catch (_error) {
+        // Ignora respostas que não sejam JSON.
+      }
+    }
+    return {};
+  }
+
+  function responseUrl(response) {
+    return String(
+      response?.url ||
+        response?.req?.url ||
+        response?.request?.url ||
+        ""
+    );
+  }
+
+  function applyAuthenticationToken(response) {
+    const url = responseUrl(response);
+    const status = Number(response?.status || response?.statusCode || 0);
+
+    if (url.includes("/api/auth/autenticar") && status >= 200 && status < 300) {
+      const body = parseResponseBody(response);
+      const token =
+        body?.token ||
+        body?.accessToken ||
+        body?.access_token ||
+        body?.data?.token;
+
+      if (token && ui?.preauthorizeApiKey) {
+        ui.preauthorizeApiKey("bearerAuth", token);
+        console.info("Token Bearer aplicado automaticamente no Swagger.");
+      }
+    }
+
+    return response;
+  }
+
+  ui = SwaggerUIBundle({
+    url: "/api/taca/v1/openapi.json",
+    dom_id: "#swagger-ui",
+    deepLinking: true,
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    filter: true,
+    tryItOutEnabled: true,
+    responseInterceptor: applyAuthenticationToken
+  });
+
+  window.ui = ui;
+})();
 `;
 }
 
