@@ -16,7 +16,7 @@ function parseJson(value) {
   try { return JSON.parse(value || "{}"); } catch { return {}; }
 }
 
-function omieCustomerPayload(order) {
+function omieCustomerPayload(order, config) {
   return buildCustomerPayload({
     documentoNormalizado: order.documentoNormalizado,
     customerLegalName: order.customerLegalName,
@@ -24,7 +24,7 @@ function omieCustomerPayload(order) {
     customerEmail: order.customerEmail,
     simpleNationalTaxpayer: order.simpleNationalTaxpayer,
     address: parseJson(order.enderecoEfetivoJson),
-  }, {});
+  }, config);
 }
 
 function isOmieClientFault(error) {
@@ -76,7 +76,7 @@ async function synchronizeCustomer(order, config, context = {}) {
     const result = await callOmie(
       "upsert-customer-by-document",
       config.instanceId,
-      omieCustomerPayload(order),
+      omieCustomerPayload(order, config),
       context,
     );
     const code = customerCode(result) || existingCode;
