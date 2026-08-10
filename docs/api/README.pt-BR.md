@@ -2,6 +2,17 @@
 
 Esta documentação descreve o contrato externo da Plataforma Taça. **Endpoints, campos JSON e status externos permanecem em inglês**.
 
+## 0. URL pública da API
+
+A Central publica frontend e backend em hosts diferentes. No ambiente de desenvolvimento:
+
+- Frontend: `https://taca-nfse-omie-dev.central.oondemand.online`
+- Base da API: `https://api-taca-nfse-omie-dev.central.oondemand.online/api`
+- Swagger UI: `https://api-taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/docs`
+- OpenAPI JSON: `https://api-taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/openapi.json`
+
+Integrações externas devem usar o host `api-*`; o host do frontend não é a base da API.
+
 ## 1. Autenticação
 
 A Plataforma deve usar um usuário dedicado da Central com a role `integracao-taca`, criado no OonCore e sem uso humano compartilhado. O token/sessão segue o mecanismo padrão de autenticação do OonCore 0.3.74.
@@ -11,6 +22,8 @@ A Plataforma deve usar um usuário dedicado da Central com a role `integracao-ta
 - não atribuir `admin`/`desenvolvedor` ao usuário da Plataforma;
 - ausência de autenticação retorna `401` pelo Core;
 - usuário autenticado sem role permitida retorna `403` pelo Core.
+
+A autenticação pública é feita em `POST /api/auth/autenticar` usando HTTP Basic Auth. O token retornado deve ser enviado como `Authorization: Bearer <token>` nas operações da Taça.
 
 ## 2. Criar pedido para emissão
 
