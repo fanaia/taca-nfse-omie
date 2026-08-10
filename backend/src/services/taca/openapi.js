@@ -24,7 +24,7 @@ const document = {
     { name: "Orders", description: "Emissão de NFS-e e solicitação de estorno." },
   ],
   paths: {
-    "/auth/autenticar": {
+    "/api/auth/autenticar": {
       post: {
         tags: ["Authentication"],
         summary: "Autenticar a Plataforma Taça",
@@ -143,7 +143,7 @@ const document = {
         type: "http",
         scheme: "bearer",
         bearerFormat: "token",
-        description: "Token retornado por `POST /auth/autenticar`.",
+        description: "Token retornado por `POST /api/auth/autenticar`.",
       },
     },
     responses: {
