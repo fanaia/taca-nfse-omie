@@ -29,6 +29,28 @@ const CALLBACK_STATUS = Object.freeze({
   ERROR: "ERROR",
 });
 
+const ORDER_STAGE = Object.freeze({
+  APPROVAL: "Aprovação",
+  CUSTOMER_SYNC: "Sinc cliente (Omie)",
+  CREATE_SERVICE_ORDER: "Criar OS (Omie)",
+  GENERATE_INVOICE: "Gerar NF (Omie)",
+  AWAIT_BILLING_RETURN: "Aguardando retorno faturamento (Omie)",
+  FINANCIAL_SETTLEMENT: "Baixa financeira",
+  NOTIFY_PLATFORM: "Notificar plataforma",
+  COMPLETED: "Concluído",
+});
+
+const ORDER_STAGES = Object.freeze(Object.values(ORDER_STAGE));
+
+const REVERSAL_STAGE = Object.freeze({
+  REQUEST: "Requisição",
+  CANCEL: "Cancelar",
+  NOTIFY_PLATFORM: "Notificar plataforma",
+  COMPLETED: "Concluído",
+});
+
+const REVERSAL_STAGES = Object.freeze(Object.values(REVERSAL_STAGE));
+
 const REVERSAL_STATUS = Object.freeze({
   PENDING: "PENDENTE",
   COMPLETED: "CONCLUIDO",
@@ -42,6 +64,10 @@ module.exports = {
   EXTERNAL_STATUS,
   INTERNAL_STATUS,
   OPERATOR_ROLES,
+  ORDER_STAGE,
+  ORDER_STAGES,
   PLATFORM_ROLES,
+  REVERSAL_STAGE,
+  REVERSAL_STAGES,
   REVERSAL_STATUS,
 };

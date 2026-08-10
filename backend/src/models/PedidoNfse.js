@@ -1,6 +1,7 @@
 "use strict";
 
 const { defineModel, fields } = require("@oondemand/oon-core-back");
+const { ORDER_STAGES } = require("../services/taca/constants");
 function indexed(descriptor) { descriptor.index = true; return descriptor; }
 function unique(descriptor) { descriptor.unique = true; descriptor.index = true; return descriptor; }
 
@@ -25,8 +26,12 @@ defineModel({
     simpleNationalTaxpayer: fields.boolean({ label: "Optante do Simples Nacional" }),
     enderecoEfetivoJson: fields.string({ label: "Endereço efetivo" }),
     origemEnderecoJson: fields.string({ label: "Origem do endereço" }),
-    statusInterno: indexed(fields.enum(INTERNAL, { required: true, label: "Status interno", default: "RECEBIDA" })),
-    externalStatus: indexed(fields.enum(EXTERNAL, { required: true, label: "Status externo", default: "RECEIVED" })),
+
+    etapa: indexed(fields.enum(ORDER_STAGES, { required: true, label: "Etapa", default: "Aprovação", readonly: true })),
+    stageRevision: fields.number({ label: "Revisão da etapa", default: 0 }),
+    statusInterno: indexed(fields.enum(INTERNAL, { required: true, label: "Status interno", default: "RECEBIDA", readonly: true })),
+    externalStatus: indexed(fields.enum(EXTERNAL, { required: true, label: "Status externo", default: "RECEIVED", readonly: true })),
+
     codigoClienteOmie: indexed(fields.number({ label: "Cliente Omie" })),
     codigoOsOmie: indexed(fields.number({ label: "Código OS Omie" })),
     numeroOs: indexed(fields.string({ label: "Número OS" })),
@@ -39,17 +44,23 @@ defineModel({
     urlPdfNfse: fields.string({ label: "PDF NFS-e" }),
     fiscalMessage: fields.string({ label: "Mensagem fiscal" }),
     fiscalCheckAttempts: fields.number({ label: "Consultas fiscais", default: 0 }),
-    callbackStatus: indexed(fields.enum(CALLBACK, { label: "Callback", default: "NOT_REQUIRED" })),
+
+    baixaFinanceiraConfirmadaEm: fields.date({ label: "Baixa financeira confirmada em" }),
+    baixaFinanceiraConfirmadaPor: fields.string({ label: "Baixa financeira confirmada por" }),
+
+    callbackStatus: indexed(fields.enum(CALLBACK, { label: "Callback", default: "NOT_REQUIRED", readonly: true })),
     callbackRevision: fields.number({ label: "Revisão callback", default: 0 }),
     callbackAttempts: fields.number({ label: "Tentativas callback", default: 0 }),
     callbackLastHttpStatus: fields.number({ label: "Último HTTP callback" }),
     callbackLastError: fields.string({ label: "Último erro callback" }),
     callbackSentAt: fields.date({ label: "Callback enviado em" }),
+
     receivedAt: indexed(fields.date({ required: true, label: "Recebido em" })),
     validatedAt: fields.date({ label: "Validado em" }),
     customerSyncedAt: fields.date({ label: "Cliente sincronizado em" }),
     serviceOrderCreatedAt: fields.date({ label: "OS criada em" }),
     invoiceConfirmedAt: indexed(fields.date({ label: "NFS-e confirmada em" })),
+    completedAt: indexed(fields.date({ label: "Concluído em" })),
     lastError: fields.string({ label: "Último erro" }),
   },
   crud: { enabled: true, roles: { write: ["admin", "desenvolvedor"] }, populateRefs: true },

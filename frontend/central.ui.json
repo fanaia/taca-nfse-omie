@@ -17,16 +17,6 @@
   },
   "pages": [
     {
-      "id": "configuracao-nfse",
-      "path": "/configuracoes-nfse",
-      "label": "Emissão NFS-e",
-      "title": "Emissão NFS-e",
-      "section": "Sistema",
-      "icon": "⚙",
-      "component": "ConfiguracaoNfsePage",
-      "order": 880
-    },
-    {
       "id": "configuracoes",
       "path": "/configuracoes",
       "label": "Configurações",
@@ -42,161 +32,32 @@
           "cards": [
             {
               "title": "Integração Omie",
-              "description": "Credenciais, conexão, webhooks, listas sincronizadas e histórico de integração.",
+              "description": "Credenciais, webhooks, listas e histórico da integração Omie.",
               "href": "/configuracoes/integracao-omie",
               "actionLabel": "Abrir integração"
             },
             {
               "title": "Emissão NFS-e",
-              "description": "Serviço, categoria, conta corrente, endereço padrão, processamento e callback em um formulário único.",
+              "description": "Parâmetros fiscais, endereço, callback e automação das etapas do processo.",
               "href": "/configuracoes-nfse",
               "actionLabel": "Configurar"
-            },
-            {
-              "title": "Clientes",
-              "description": "Vínculos locais por CPF/CNPJ e identificadores persistidos do Omie.",
-              "href": "/clientes-taca",
-              "actionLabel": "Ver clientes"
             }
           ]
         }
       ]
+    },
+    {
+      "id": "configuracao-nfse",
+      "path": "/configuracoes-nfse",
+      "label": "Emissão NFS-e",
+      "title": "Emissão NFS-e",
+      "section": "Sistema",
+      "icon": "⚙",
+      "order": 910,
+      "component": "ConfiguracaoNfsePage"
     }
   ],
   "collections": [
-    {
-      "model": "PedidoNfse",
-      "mode": "dynamic",
-      "path": "/pedidos-nfse",
-      "label": "Pedidos / NFS-e",
-      "section": "Operação",
-      "list": {
-        "filters": [
-          {
-            "field": "externalStatus",
-            "label": "Status",
-            "type": "select",
-            "options": [
-              { "label": "Todos", "value": "" },
-              { "label": "Recebido", "value": "RECEIVED" },
-              { "label": "Validado", "value": "VALIDATED" },
-              { "label": "Cliente sincronizado", "value": "CUSTOMER_SYNCED" },
-              { "label": "OS criada", "value": "SERVICE_ORDER_CREATED" },
-              { "label": "NFS-e em processamento", "value": "INVOICE_PROCESSING" },
-              { "label": "NFS-e emitida", "value": "INVOICE_ISSUED" },
-              { "label": "Erro", "value": "ERROR" }
-            ]
-          },
-          {
-            "field": "callbackStatus",
-            "label": "Callback",
-            "type": "select",
-            "options": [
-              { "label": "Todos", "value": "" },
-              { "label": "Pendente", "value": "PENDING" },
-              { "label": "Enviado", "value": "SENT" },
-              { "label": "Erro", "value": "ERROR" }
-            ]
-          }
-        ],
-        "columns": ["integrationCode", "documentoMascarado", "customerLegalName", "amount", "externalStatus", "numeroOs", "numeroNfse", "receivedAt", "callbackStatus"],
-        "rowActions": [
-          {
-            "id": "reconcileInvoice",
-            "type": "apiAction",
-            "label": "Reprocessar confirmação fiscal",
-            "method": "POST",
-            "endpoint": "/api/taca/ops/orders/:id/reconcile",
-            "confirm": { "title": "Reprocessar confirmação fiscal", "description": "Consulta apenas esta OS no Omie. Não cria outra OS nem refatura." },
-            "refresh": ["self", "all"]
-          },
-          {
-            "id": "resendOrderCallback",
-            "type": "apiAction",
-            "label": "Reenviar callback",
-            "method": "POST",
-            "endpoint": "/api/taca/ops/orders/:id/resend-callback",
-            "confirm": { "title": "Reenviar callback", "description": "Reenvia somente o callback do estado atual; não altera a NFS-e." },
-            "refresh": ["self", "all"]
-          }
-        ],
-        "builtInActions": { "create": false, "edit": false, "delete": false }
-      },
-      "detailModal": {
-        "enabled": true,
-        "titleField": "integrationCode",
-        "size": "xl",
-        "defaultTab": "dados",
-        "tabs": [
-          {
-            "id": "dados",
-            "label": "Dados e rastreabilidade",
-            "type": "form",
-            "groups": [
-              {
-                "label": "Pedido",
-                "fields": ["integrationCode", "documentoMascarado", "customerLegalName", "customerEmail", "amount", "externalStatus", "statusInterno", "receivedAt", "validatedAt"],
-                "columns": 2
-              },
-              {
-                "label": "Omie / Fiscal",
-                "fields": ["codigoClienteOmie", "codigoOsOmie", "numeroOs", "faturamentoSolicitadoEm", "fiscalStatusCode", "numeroRps", "numeroNfse", "codigoVerificacaoNfse", "urlNfse", "urlPdfNfse", "invoiceConfirmedAt", "fiscalMessage"],
-                "columns": 2
-              },
-              {
-                "label": "Callback / erros",
-                "fields": ["callbackStatus", "callbackAttempts", "callbackLastHttpStatus", "callbackLastError", "callbackSentAt", "lastError"],
-                "columns": 2
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "model": "EstornoTaca",
-      "mode": "dynamic",
-      "path": "/estornos-taca",
-      "label": "Estornos",
-      "section": "Operação",
-      "list": {
-        "filters": [
-          {
-            "field": "status",
-            "label": "Status",
-            "type": "select",
-            "options": [
-              { "label": "Todos", "value": "" },
-              { "label": "Pendente", "value": "PENDENTE" },
-              { "label": "Concluído", "value": "CONCLUIDO" }
-            ]
-          }
-        ],
-        "columns": ["ticketKey", "integrationCode", "invoiceNumber", "status", "requestedAt", "requestedBy", "confirmedAt", "confirmedBy", "callbackStatus"],
-        "rowActions": [
-          {
-            "id": "confirmReversal",
-            "type": "apiAction",
-            "label": "Confirmar estorno concluído",
-            "method": "POST",
-            "endpoint": "/api/taca/ops/reversals/:id/confirm",
-            "confirm": { "title": "Confirmar estorno concluído", "description": "Use somente após executar e validar manualmente o estorno no Omie/prefeitura." },
-            "hiddenWhen": { "field": "status", "notEquals": "PENDENTE" },
-            "refresh": ["self", "all"]
-          },
-          {
-            "id": "resendReversalCallback",
-            "type": "apiAction",
-            "label": "Reenviar callback",
-            "method": "POST",
-            "endpoint": "/api/taca/ops/reversals/:id/resend-callback",
-            "hiddenWhen": { "field": "status", "notEquals": "CONCLUIDO" },
-            "refresh": ["self", "all"]
-          }
-        ],
-        "builtInActions": { "create": false, "edit": false, "delete": false }
-      }
-    },
     {
       "model": "ClienteTaca",
       "mode": "dynamic",
@@ -204,11 +65,347 @@
       "label": "Clientes",
       "section": "Sistema",
       "list": {
-        "columns": ["documentoMascarado", "razaoSocial", "email", "codigoClienteOmie", "sincronizadoEm", "ultimoErro"],
-        "builtInActions": { "create": false, "edit": false, "delete": false }
+        "filters": [
+          {
+            "field": "documentoMascarado",
+            "label": "Documento",
+            "type": "text"
+          }
+        ],
+        "columns": [
+          "documentoMascarado",
+          "razaoSocial",
+          "nomeFantasia",
+          "email",
+          "codigoClienteOmie",
+          "sincronizadoEm",
+          "ultimoErro"
+        ],
+        "builtInActions": {
+          "create": false,
+          "edit": false,
+          "delete": false
+        }
+      },
+      "detailModal": {
+        "enabled": true,
+        "titleField": "razaoSocial",
+        "size": "xl",
+        "defaultTab": "dados",
+        "tabs": [
+          {
+            "id": "dados",
+            "label": "Dados",
+            "type": "form",
+            "groups": [
+              {
+                "label": "Cliente",
+                "fields": [
+                  "documentoMascarado",
+                  "razaoSocial",
+                  "nomeFantasia",
+                  "email"
+                ],
+                "columns": 2
+              },
+              {
+                "label": "Omie",
+                "fields": [
+                  "codigoClienteOmie",
+                  "sincronizadoEm",
+                  "ultimoErro"
+                ],
+                "columns": 2
+              }
+            ]
+          }
+        ]
       }
     }
   ],
-  "pipelines": [],
+  "pipelines": [
+    {
+      "name": "PedidosNfse",
+      "model": "PedidoNfse",
+      "stageField": "etapa",
+      "path": "/pedidos-nfse",
+      "label": "Pedidos / NFS-e",
+      "section": "Operação",
+      "titleField": "integrationCode",
+      "stages": [
+        { "id": "Aprovação", "label": "Aprovação" },
+        { "id": "Sinc cliente (Omie)", "label": "Sinc cliente (Omie)" },
+        { "id": "Criar OS (Omie)", "label": "Criar OS (Omie)" },
+        { "id": "Gerar NF (Omie)", "label": "Gerar NF (Omie)" },
+        { "id": "Aguardando retorno faturamento (Omie)", "label": "Aguardando retorno faturamento (Omie)" },
+        { "id": "Baixa financeira", "label": "Baixa financeira" },
+        { "id": "Notificar plataforma", "label": "Notificar plataforma" },
+        { "id": "Concluído", "label": "Concluído" }
+      ],
+      "filters": [
+        { "field": "externalStatus", "label": "Status externo", "type": "select" },
+        { "field": "callbackStatus", "label": "Callback", "type": "select" },
+        { "field": "documentoMascarado", "label": "Documento", "type": "text" }
+      ],
+      "viewModes": ["board", "list"],
+      "defaultView": "board",
+      "list": {
+        "columns": [
+          "integrationCode",
+          "documentoMascarado",
+          "customerLegalName",
+          "amount",
+          "etapa",
+          "externalStatus",
+          "numeroOs",
+          "numeroNfse",
+          "callbackStatus",
+          "receivedAt",
+          "lastError"
+        ]
+      },
+      "cardFields": [
+        { "field": "customerLegalName", "label": "Cliente" },
+        { "field": "amount", "label": "Valor", "format": "currency" },
+        { "field": "externalStatus", "label": "Status", "format": "badge" },
+        { "field": "numeroOs", "label": "OS" },
+        { "field": "numeroNfse", "label": "NFS-e" },
+        { "field": "lastError", "label": "Erro" }
+      ],
+      "defaultActions": false,
+      "ticketActions": [
+        {
+          "id": "aprovar",
+          "label": "Aprovar",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/orders/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Aprovação" },
+          "confirm": { "title": "Aprovar pedido?", "description": "O pedido seguirá para sincronização do cliente no Omie." },
+          "refresh": ["all"],
+          "tone": "success"
+        },
+        {
+          "id": "sincronizar-cliente",
+          "label": "Sincronizar cliente",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/orders/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Sinc cliente (Omie)" },
+          "confirm": { "title": "Sincronizar cliente no Omie?", "description": "A operação utiliza o CPF/CNPJ como chave e reaproveita o vínculo Omie já persistido quando existir." },
+          "refresh": ["all"]
+        },
+        {
+          "id": "criar-os",
+          "label": "Criar OS",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/orders/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Criar OS (Omie)" },
+          "confirm": { "title": "Criar Ordem de Serviço?", "description": "A Central criará ou reconciliará a OS no Omie de forma idempotente." },
+          "refresh": ["all"]
+        },
+        {
+          "id": "gerar-nf",
+          "label": "Gerar NF",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/orders/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Gerar NF (Omie)" },
+          "confirm": { "title": "Faturar a OS no Omie?", "description": "A Central solicitará o faturamento; a emissão só será considerada confirmada após o retorno fiscal." },
+          "refresh": ["all"]
+        },
+        {
+          "id": "verificar-faturamento",
+          "label": "Verificar faturamento",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/orders/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Aguardando retorno faturamento (Omie)" },
+          "confirm": { "title": "Verificar retorno do faturamento?", "description": "A Central consultará a OS no Omie e atualizará a situação fiscal da NFS-e." },
+          "refresh": ["all"]
+        },
+        {
+          "id": "confirmar-baixa-financeira",
+          "label": "Confirmar baixa financeira",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/orders/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Baixa financeira" },
+          "confirm": { "title": "Confirmar baixa financeira?", "description": "A Central registrará a confirmação da baixa e seguirá para a notificação da Plataforma." },
+          "refresh": ["all"],
+          "tone": "success"
+        },
+        {
+          "id": "notificar-plataforma",
+          "label": "Notificar plataforma",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/orders/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Notificar plataforma" },
+          "confirm": { "title": "Notificar a Plataforma?", "description": "O callback será enviado de forma assíncrona. A etapa só será concluída após resposta HTTP de sucesso." },
+          "refresh": ["all"]
+        }
+      ],
+      "ticketModal": {
+        "enabled": true,
+        "titleField": "integrationCode",
+        "size": "full",
+        "defaultTab": "pedido",
+        "tabs": [
+          {
+            "id": "pedido",
+            "label": "Pedido",
+            "type": "form",
+            "groups": [
+              {
+                "label": "Processo",
+                "fields": ["etapa", "externalStatus", "statusInterno", "receivedAt", "completedAt"],
+                "columns": 3
+              },
+              {
+                "label": "Cliente e venda",
+                "fields": ["integrationCode", "documentoMascarado", "customerLegalName", "customerEmail", "amount"],
+                "columns": 3
+              }
+            ]
+          },
+          {
+            "id": "omie",
+            "label": "Omie / Fiscal",
+            "type": "form",
+            "groups": [
+              {
+                "label": "Omie",
+                "fields": ["codigoClienteOmie", "codigoOsOmie", "numeroOs", "faturamentoSolicitadoEm"],
+                "columns": 2
+              },
+              {
+                "label": "NFS-e",
+                "fields": ["fiscalStatusCode", "numeroRps", "numeroNfse", "codigoVerificacaoNfse", "urlNfse", "urlPdfNfse", "invoiceConfirmedAt", "fiscalMessage"],
+                "columns": 2
+              },
+              {
+                "label": "Baixa financeira",
+                "fields": ["baixaFinanceiraConfirmadaEm", "baixaFinanceiraConfirmadaPor"],
+                "columns": 2
+              }
+            ]
+          },
+          {
+            "id": "callback",
+            "label": "Callback / Erros",
+            "type": "form",
+            "groups": [
+              {
+                "label": "Callback",
+                "fields": ["callbackStatus", "callbackAttempts", "callbackLastHttpStatus", "callbackLastError", "callbackSentAt"],
+                "columns": 2
+              },
+              {
+                "label": "Diagnóstico",
+                "fields": ["lastError", "fiscalMessage"],
+                "columns": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "EstornosTaca",
+      "model": "EstornoTaca",
+      "stageField": "etapa",
+      "path": "/estornos-taca",
+      "label": "Estornos",
+      "section": "Operação",
+      "titleField": "integrationCode",
+      "stages": [
+        { "id": "Requisição", "label": "Requisição" },
+        { "id": "Cancelar", "label": "Cancelar" },
+        { "id": "Notificar plataforma", "label": "Notificar plataforma" },
+        { "id": "Concluído", "label": "Concluído" }
+      ],
+      "filters": [
+        { "field": "callbackStatus", "label": "Callback", "type": "select" },
+        { "field": "externalStatus", "label": "Status externo", "type": "select" }
+      ],
+      "viewModes": ["board", "list"],
+      "defaultView": "board",
+      "list": {
+        "columns": ["integrationCode", "etapa", "externalStatus", "invoiceNumber", "requestedAt", "requestedBy", "confirmedAt", "confirmedBy", "callbackStatus"]
+      },
+      "cardFields": [
+        { "field": "invoiceNumber", "label": "NFS-e" },
+        { "field": "externalStatus", "label": "Status", "format": "badge" },
+        { "field": "requestedAt", "label": "Solicitado em", "format": "datetime" },
+        { "field": "callbackStatus", "label": "Callback", "format": "badge" }
+      ],
+      "defaultActions": false,
+      "ticketActions": [
+        {
+          "id": "encaminhar-cancelamento",
+          "label": "Encaminhar para cancelar",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/reversals/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Requisição" },
+          "confirm": { "title": "Encaminhar para cancelamento?", "description": "A solicitação seguirá para a etapa manual de cancelamento. Nenhum cancelamento será executado automaticamente." },
+          "refresh": ["all"]
+        },
+        {
+          "id": "confirmar-cancelamento",
+          "label": "Confirmar cancelamento",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/reversals/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Cancelar" },
+          "confirm": { "title": "Confirmar cancelamento realizado?", "description": "Use somente depois de concluir o procedimento de cancelamento. A Central seguirá para a notificação da Plataforma." },
+          "refresh": ["all"],
+          "tone": "success"
+        },
+        {
+          "id": "notificar-plataforma-estorno",
+          "label": "Notificar plataforma",
+          "type": "apiAction",
+          "method": "POST",
+          "endpoint": "/api/taca/ops/reversals/:id/advance",
+          "visibleWhen": { "field": "etapa", "equals": "Notificar plataforma" },
+          "confirm": { "title": "Notificar a Plataforma?", "description": "O callback de estorno será enviado e a esteira será concluída somente após sucesso." },
+          "refresh": ["all"]
+        }
+      ],
+      "ticketModal": {
+        "enabled": true,
+        "titleField": "integrationCode",
+        "size": "xl",
+        "defaultTab": "dados",
+        "tabs": [
+          {
+            "id": "dados",
+            "label": "Dados",
+            "type": "form",
+            "groups": [
+              {
+                "label": "Processo",
+                "fields": ["etapa", "externalStatus", "status", "requestedAt", "requestedBy", "confirmedAt", "confirmedBy", "confirmationNote", "completedAt"],
+                "columns": 2
+              },
+              {
+                "label": "NFS-e relacionada",
+                "fields": ["pedidoId", "invoiceNumber", "verificationCode", "invoiceUrl"],
+                "columns": 2
+              },
+              {
+                "label": "Callback",
+                "fields": ["callbackStatus", "callbackAttempts", "callbackLastHttpStatus", "callbackLastError", "callbackSentAt"],
+                "columns": 2
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
   "documents": []
 }
