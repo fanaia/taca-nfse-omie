@@ -4,7 +4,7 @@
   "IMAGE": "ghcr.io/oondemand/taca-nfse-omie-backend",
   "IMAGE_TAG": "latest",
   "HOST": "taca-nfse-omie.oondemand.com",
-  "CENTRAL_ATIVACAO_URL": "https://central-ativacao.example.com",
+  "CENTRAL_ATIVACAO_URL": "https://central-ativacao.central.oondemand.online",
   "APP_CODE": "taca-nfse-omie",
   "REPLICAS": "1",
   "HPA_MIN": "1",

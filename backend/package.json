@@ -2,16 +2,19 @@
   "name": "taca-nfse-omie-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Backend da Central Taca Nfse Omie — só domínio, consome @oondemand/oon-core-back.",
+  "description": "Backend da Central Taça NFS-e Omie — domínio sobre OonCore 0.3.74.",
   "scripts": {
     "dev": "oonCore-back dev",
     "start": "oonCore-back start",
+    "test": "node --test",
     "activate": "oonCore-back activate",
+    "integration:worker": "oonCore-integration-worker",
+    "integration:worker:once": "oonCore-integration-worker --once",
     "build:image": "oonCore-back build:image",
     "k8s:render": "oonCore-back k8s:render",
     "deploy": "oonCore-back deploy"
   },
   "dependencies": {
-    "@oondemand/oon-core-back": "^0.3.74"
+    "@oondemand/oon-core-back": "0.3.74"
   }
 }
