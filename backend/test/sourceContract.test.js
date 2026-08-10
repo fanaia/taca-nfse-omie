@@ -107,6 +107,22 @@ test("the single order approval delegates execution to the current process stage
   }
 });
 
+test("customer synchronization is idempotent and respects UpsertClienteCpfCnpj", () => {
+  const mapping = read("backend/src/mappings/omie.js");
+  const handler = read("backend/src/services/taca/orderStageHandler.js");
+  const model = read("backend/src/models/ClienteTaca.js");
+  const payload = read("backend/src/services/taca/omiePayload.js");
+
+  assert.match(mapping, /orderStageHandler/);
+  assert.match(mapping, /UpsertClienteCpfCnpj/);
+  assert.match(model, /sincronizadoFingerprint/);
+  assert.match(handler, /customerFingerprint/);
+  assert.match(handler, /customerSyncSkipped/);
+  assert.match(handler, /legacySyncedFingerprint/);
+  assert.match(handler, /SOAP-ENV:Client/);
+  assert.doesNotMatch(payload, /codigo_cliente_integracao/);
+});
+
 test("all order process automations default to manual", () => {
   const config = read("backend/src/services/taca/config.js");
   for (const field of [
