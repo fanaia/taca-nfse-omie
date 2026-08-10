@@ -25,6 +25,8 @@ test("Core packages are pinned exactly to 0.3.74", () => {
 
 test("public API contract stays English and protected by Core private routes", () => {
   const source = read("backend/src/routes/tacaApi.js");
+  assert.match(source, /defineRoutes\("\/taca\/v1"/);
+  assert.doesNotMatch(source, /defineRoutes\("\/api\/taca\/v1"/);
   assert.match(source, /router\.private\.post\("\/orders"/);
   assert.match(source, /router\.private\.post\("\/orders\/:integrationCode\/reversal"/);
   assert.match(source, /PLATFORM_ROLES/);
