@@ -45,7 +45,9 @@ function swaggerHtml() {
 </html>`;
 }
 
-defineRoutes("/api/taca/v1", (router) => {
+// A URL pública mantém /api/taca/v1/*, porém o Nginx do delivery OonCore
+// remove /api antes de encaminhar a requisição ao backend Express.
+defineRoutes("/taca/v1", (router) => {
   router.public.get("/openapi.json", async (_req, res) => {
     res.set("Cache-Control", "public, max-age=300");
     res.status(200).json(openapi);
