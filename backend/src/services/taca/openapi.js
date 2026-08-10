@@ -103,7 +103,7 @@ const document = {
         tags: ["Orders"],
         summary: "Solicitar estorno do pedido",
         description:
-          "Cria, de forma idempotente, um Ticket para execução manual do estorno. A Central não executa `CancelarOS` automaticamente.",
+          "Cria, de forma idempotente, um Ticket para execução manual do estorno. O cancelamento da OS permanece uma operação manual.",
         security: [{ bearerAuth: [] }],
         parameters: [
           {
