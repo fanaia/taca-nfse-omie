@@ -2,30 +2,19 @@
   "$schema": "./node_modules/@oondemand/create-central-oon/schemas/central.app.schema.json",
   "schemaVersion": 1,
   "id": "taca-nfse-omie",
-  "name": "Taca Nfse Omie",
+  "name": "Central Taça — NFS-e Omie",
   "slug": "taca-nfse-omie",
   "appKind": "member-central",
   "modules": {
     "collections": true,
     "documents": false,
     "pipelines": false,
-    "integrations": false,
-    "omie": false,
+    "integrations": true,
+    "omie": true,
     "assistants": false,
     "currencies": false
   },
-  "capabilities": [
-    "core.collections"
-  ],
-  "compatibility": {
-    "core": {
-      "minVersion": "0.3.45",
-      "maxVersionExclusive": "0.4.0"
-    }
-  },
-  "activation": {
-    "enabled": true,
-    "configurationVersion": 1,
-    "fields": []
-  }
+  "capabilities": ["core.collections", "core.integrations", "core.integrations.omie"],
+  "compatibility": { "core": { "minVersion": "0.3.74", "maxVersionExclusive": "0.3.75" } },
+  "activation": { "enabled": true, "configurationVersion": 1, "fields": [] }
 }

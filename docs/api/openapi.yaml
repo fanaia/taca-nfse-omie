@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: Taca Platform API - NFS-e Omie Side-Car
+  version: 1.0.0
+paths:
+  /api/taca/v1/orders:
+    post:
+      summary: Submit a paid order for asynchronous NFS-e issuance
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderRequest' }
+      responses:
+        '202': { description: Accepted }
+        '200': { description: Idempotent replay }
+        '401': { description: Authentication required }
+        '403': { description: Insufficient permission }
+        '409': { description: Idempotency conflict }
+        '422': { description: Validation or address policy error }
+  /api/taca/v1/orders/{integrationCode}/reversal:
+    post:
+      summary: Request a manual reversal ticket
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: integrationCode
+          required: true
+          schema: { type: string }
+      responses:
+        '202': { description: Reversal ticket accepted }
+        '200': { description: Idempotent replay }
+        '401': { description: Authentication required }
+        '403': { description: Insufficient permission }
+        '404': { description: Order not found }
+        '409': { description: Reversal not eligible }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  schemas:
+    OrderRequest:
+      type: object
+      required: [integrationCode, amount, customer]
+      properties:
+        integrationCode: { type: string, maxLength: 60 }
+        amount: { type: number, minimum: 0.01 }
+        customer:
+          type: object
+          required: [document, legalName, email]
+          properties:
+            document: { type: string }
+            legalName: { type: string }
+            tradeName: { type: string }
+            email: { type: string, format: email }
+            simpleNationalTaxpayer: { type: boolean }
+            address:
+              type: object
+              properties:
+                street: { type: string }
+                number: { type: string }
+                complement: { type: string }
+                district: { type: string }
+                cityIbgeCode: { type: string }
+                state: { type: string }
+                postalCode: { type: string }
