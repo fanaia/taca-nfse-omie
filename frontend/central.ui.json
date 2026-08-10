@@ -1,13 +1,31 @@
 {
   "schemaVersion": 2,
-  "backend": { "metadataUrl": "/core/metadata" },
+  "backend": {
+    "metadataUrl": "/core/metadata"
+  },
   "navigation": {
     "mode": "mixed",
     "items": [
-      { "label": "Tickets de Integração", "href": "/configuracoes/integracao-omie/tickets", "icon": "↔", "section": "Sistema", "order": 850 }
+      {
+        "label": "Tickets de Integração",
+        "href": "/configuracoes/integracao-omie/tickets",
+        "icon": "↔",
+        "section": "Sistema",
+        "order": 850
+      }
     ]
   },
   "pages": [
+    {
+      "id": "configuracao-nfse",
+      "path": "/configuracoes-nfse",
+      "label": "Emissão NFS-e",
+      "title": "Emissão NFS-e",
+      "section": "Sistema",
+      "icon": "⚙",
+      "component": "ConfiguracaoNfsePage",
+      "order": 880
+    },
     {
       "id": "configuracoes",
       "path": "/configuracoes",
@@ -16,16 +34,33 @@
       "section": "Sistema",
       "icon": "⚙",
       "order": 900,
-      "blocks": [{
-        "type": "navigation.cards",
-        "title": "Configurações da Central",
-        "columns": 2,
-        "cards": [
-          { "title": "Integração Omie", "description": "Credenciais, conexão, webhooks e histórico de integração.", "href": "/configuracoes/integracao-omie", "actionLabel": "Abrir integração" },
-          { "title": "Emissão NFS-e", "description": "Serviço, categoria, conta corrente, endereço padrão, callback e política de emissão sem endereço.", "href": "/configuracoes-nfse", "actionLabel": "Configurar" },
-          { "title": "Clientes", "description": "Vínculos locais por CPF/CNPJ e identificadores persistidos do Omie.", "href": "/clientes-taca", "actionLabel": "Ver clientes" }
-        ]
-      }]
+      "blocks": [
+        {
+          "type": "navigation.cards",
+          "title": "Configurações da Central",
+          "columns": 2,
+          "cards": [
+            {
+              "title": "Integração Omie",
+              "description": "Credenciais, conexão, webhooks, listas sincronizadas e histórico de integração.",
+              "href": "/configuracoes/integracao-omie",
+              "actionLabel": "Abrir integração"
+            },
+            {
+              "title": "Emissão NFS-e",
+              "description": "Serviço, categoria, conta corrente, endereço padrão, processamento e callback em um formulário único.",
+              "href": "/configuracoes-nfse",
+              "actionLabel": "Configurar"
+            },
+            {
+              "title": "Clientes",
+              "description": "Vínculos locais por CPF/CNPJ e identificadores persistidos do Omie.",
+              "href": "/clientes-taca",
+              "actionLabel": "Ver clientes"
+            }
+          ]
+        }
+      ]
     }
   ],
   "collections": [
@@ -37,30 +72,85 @@
       "section": "Operação",
       "list": {
         "filters": [
-          { "field": "externalStatus", "label": "Status", "type": "select", "options": [
-            { "label": "Todos", "value": "" }, { "label": "Recebido", "value": "RECEIVED" },
-            { "label": "Validado", "value": "VALIDATED" }, { "label": "Cliente sincronizado", "value": "CUSTOMER_SYNCED" },
-            { "label": "OS criada", "value": "SERVICE_ORDER_CREATED" }, { "label": "NFS-e em processamento", "value": "INVOICE_PROCESSING" },
-            { "label": "NFS-e emitida", "value": "INVOICE_ISSUED" }, { "label": "Erro", "value": "ERROR" }
-          ]},
-          { "field": "callbackStatus", "label": "Callback", "type": "select", "options": [
-            { "label": "Todos", "value": "" }, { "label": "Pendente", "value": "PENDING" }, { "label": "Enviado", "value": "SENT" }, { "label": "Erro", "value": "ERROR" }
-          ]}
+          {
+            "field": "externalStatus",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              { "label": "Todos", "value": "" },
+              { "label": "Recebido", "value": "RECEIVED" },
+              { "label": "Validado", "value": "VALIDATED" },
+              { "label": "Cliente sincronizado", "value": "CUSTOMER_SYNCED" },
+              { "label": "OS criada", "value": "SERVICE_ORDER_CREATED" },
+              { "label": "NFS-e em processamento", "value": "INVOICE_PROCESSING" },
+              { "label": "NFS-e emitida", "value": "INVOICE_ISSUED" },
+              { "label": "Erro", "value": "ERROR" }
+            ]
+          },
+          {
+            "field": "callbackStatus",
+            "label": "Callback",
+            "type": "select",
+            "options": [
+              { "label": "Todos", "value": "" },
+              { "label": "Pendente", "value": "PENDING" },
+              { "label": "Enviado", "value": "SENT" },
+              { "label": "Erro", "value": "ERROR" }
+            ]
+          }
         ],
         "columns": ["integrationCode", "documentoMascarado", "customerLegalName", "amount", "externalStatus", "numeroOs", "numeroNfse", "receivedAt", "callbackStatus"],
         "rowActions": [
-          { "id": "reconcileInvoice", "type": "apiAction", "label": "Reprocessar confirmação fiscal", "method": "POST", "endpoint": "/api/taca/ops/orders/:id/reconcile", "confirm": { "title": "Reprocessar confirmação fiscal", "description": "Consulta apenas esta OS no Omie. Não cria outra OS nem refatura." }, "refresh": ["self", "all"] },
-          { "id": "resendOrderCallback", "type": "apiAction", "label": "Reenviar callback", "method": "POST", "endpoint": "/api/taca/ops/orders/:id/resend-callback", "confirm": { "title": "Reenviar callback", "description": "Reenvia somente o callback do estado atual; não altera a NFS-e." }, "refresh": ["self", "all"] }
+          {
+            "id": "reconcileInvoice",
+            "type": "apiAction",
+            "label": "Reprocessar confirmação fiscal",
+            "method": "POST",
+            "endpoint": "/api/taca/ops/orders/:id/reconcile",
+            "confirm": { "title": "Reprocessar confirmação fiscal", "description": "Consulta apenas esta OS no Omie. Não cria outra OS nem refatura." },
+            "refresh": ["self", "all"]
+          },
+          {
+            "id": "resendOrderCallback",
+            "type": "apiAction",
+            "label": "Reenviar callback",
+            "method": "POST",
+            "endpoint": "/api/taca/ops/orders/:id/resend-callback",
+            "confirm": { "title": "Reenviar callback", "description": "Reenvia somente o callback do estado atual; não altera a NFS-e." },
+            "refresh": ["self", "all"]
+          }
         ],
         "builtInActions": { "create": false, "edit": false, "delete": false }
       },
       "detailModal": {
-        "enabled": true, "titleField": "integrationCode", "size": "xl", "defaultTab": "dados",
-        "tabs": [{ "id": "dados", "label": "Dados e rastreabilidade", "type": "form", "groups": [
-          { "label": "Pedido", "fields": ["integrationCode", "documentoMascarado", "customerLegalName", "customerEmail", "amount", "externalStatus", "statusInterno", "receivedAt", "validatedAt"], "columns": 2 },
-          { "label": "Omie / Fiscal", "fields": ["codigoClienteOmie", "codigoOsOmie", "numeroOs", "faturamentoSolicitadoEm", "fiscalStatusCode", "numeroRps", "numeroNfse", "codigoVerificacaoNfse", "urlNfse", "urlPdfNfse", "invoiceConfirmedAt", "fiscalMessage"], "columns": 2 },
-          { "label": "Callback / erros", "fields": ["callbackStatus", "callbackAttempts", "callbackLastHttpStatus", "callbackLastError", "callbackSentAt", "lastError"], "columns": 2 }
-        ] }]
+        "enabled": true,
+        "titleField": "integrationCode",
+        "size": "xl",
+        "defaultTab": "dados",
+        "tabs": [
+          {
+            "id": "dados",
+            "label": "Dados e rastreabilidade",
+            "type": "form",
+            "groups": [
+              {
+                "label": "Pedido",
+                "fields": ["integrationCode", "documentoMascarado", "customerLegalName", "customerEmail", "amount", "externalStatus", "statusInterno", "receivedAt", "validatedAt"],
+                "columns": 2
+              },
+              {
+                "label": "Omie / Fiscal",
+                "fields": ["codigoClienteOmie", "codigoOsOmie", "numeroOs", "faturamentoSolicitadoEm", "fiscalStatusCode", "numeroRps", "numeroNfse", "codigoVerificacaoNfse", "urlNfse", "urlPdfNfse", "invoiceConfirmedAt", "fiscalMessage"],
+                "columns": 2
+              },
+              {
+                "label": "Callback / erros",
+                "fields": ["callbackStatus", "callbackAttempts", "callbackLastHttpStatus", "callbackLastError", "callbackSentAt", "lastError"],
+                "columns": 2
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -70,22 +160,53 @@
       "label": "Estornos",
       "section": "Operação",
       "list": {
-        "filters": [{ "field": "status", "label": "Status", "type": "select", "options": [{ "label": "Todos", "value": "" }, { "label": "Pendente", "value": "PENDENTE" }, { "label": "Concluído", "value": "CONCLUIDO" }] }],
+        "filters": [
+          {
+            "field": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              { "label": "Todos", "value": "" },
+              { "label": "Pendente", "value": "PENDENTE" },
+              { "label": "Concluído", "value": "CONCLUIDO" }
+            ]
+          }
+        ],
         "columns": ["ticketKey", "integrationCode", "invoiceNumber", "status", "requestedAt", "requestedBy", "confirmedAt", "confirmedBy", "callbackStatus"],
         "rowActions": [
-          { "id": "confirmReversal", "type": "apiAction", "label": "Confirmar estorno concluído", "method": "POST", "endpoint": "/api/taca/ops/reversals/:id/confirm", "confirm": { "title": "Confirmar estorno concluído", "description": "Use somente após executar e validar manualmente o estorno no Omie/prefeitura." }, "hiddenWhen": { "field": "status", "notEquals": "PENDENTE" }, "refresh": ["self", "all"] },
-          { "id": "resendReversalCallback", "type": "apiAction", "label": "Reenviar callback", "method": "POST", "endpoint": "/api/taca/ops/reversals/:id/resend-callback", "hiddenWhen": { "field": "status", "notEquals": "CONCLUIDO" }, "refresh": ["self", "all"] }
+          {
+            "id": "confirmReversal",
+            "type": "apiAction",
+            "label": "Confirmar estorno concluído",
+            "method": "POST",
+            "endpoint": "/api/taca/ops/reversals/:id/confirm",
+            "confirm": { "title": "Confirmar estorno concluído", "description": "Use somente após executar e validar manualmente o estorno no Omie/prefeitura." },
+            "hiddenWhen": { "field": "status", "notEquals": "PENDENTE" },
+            "refresh": ["self", "all"]
+          },
+          {
+            "id": "resendReversalCallback",
+            "type": "apiAction",
+            "label": "Reenviar callback",
+            "method": "POST",
+            "endpoint": "/api/taca/ops/reversals/:id/resend-callback",
+            "hiddenWhen": { "field": "status", "notEquals": "CONCLUIDO" },
+            "refresh": ["self", "all"]
+          }
         ],
         "builtInActions": { "create": false, "edit": false, "delete": false }
       }
     },
     {
-      "model": "ConfiguracaoNfse", "mode": "dynamic", "path": "/configuracoes-nfse", "label": "Emissão NFS-e", "section": "Sistema",
-      "list": { "columns": ["instanceId", "codigoServicoOmie", "codigoCategoriaOmie", "cidadePrestacaoServico", "allowIssuanceWithoutAddress", "callbackUrl"], "builtInActions": { "create": true, "edit": true, "delete": false } }
-    },
-    {
-      "model": "ClienteTaca", "mode": "dynamic", "path": "/clientes-taca", "label": "Clientes", "section": "Sistema",
-      "list": { "columns": ["documentoMascarado", "razaoSocial", "email", "codigoClienteOmie", "sincronizadoEm", "ultimoErro"], "builtInActions": { "create": false, "edit": false, "delete": false } }
+      "model": "ClienteTaca",
+      "mode": "dynamic",
+      "path": "/clientes-taca",
+      "label": "Clientes",
+      "section": "Sistema",
+      "list": {
+        "columns": ["documentoMascarado", "razaoSocial", "email", "codigoClienteOmie", "sincronizadoEm", "ultimoErro"],
+        "builtInActions": { "create": false, "edit": false, "delete": false }
+      }
     }
   ],
   "pipelines": [],

@@ -42,7 +42,17 @@ function core() { return { ...loadCore(), enqueueIntegration }; }
 
 function models() {
   const { registry } = core();
-  const names = ["ConfiguracaoNfse", "ClienteTaca", "PedidoNfse", "EstornoTaca"];
+  const names = [
+    "ConfiguracaoNfse",
+    "ClienteTaca",
+    "PedidoNfse",
+    "EstornoTaca",
+    "ServicoOmie",
+    "CategoriaOmie",
+    "ContaCorrenteOmie",
+    "CondicaoPagamentoOmie",
+    "CidadeOmie",
+  ];
   const result = Object.fromEntries(names.map((name) => [name, registry.getModel(name)?.mongooseModel]));
   for (const name of names) if (!result[name]) throw new Error(`Model ${name} não registrado.`);
   return result;

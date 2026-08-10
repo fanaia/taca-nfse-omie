@@ -31,6 +31,31 @@ test("public API contract stays English and protected by Core private routes", (
   assert.doesNotMatch(source, /\/pedidos|\/estorno\b/);
 });
 
+test("NFS-e configuration is a singleton custom form instead of a CRUD datagrid", () => {
+  const ui = JSON.parse(read("frontend/central.ui.json"));
+  assert.equal(ui.collections.some((collection) => collection.model === "ConfiguracaoNfse"), false);
+  const page = ui.pages.find((item) => item.id === "configuracao-nfse");
+  assert.equal(page?.component, "ConfiguracaoNfsePage");
+  assert.equal(page?.path, "/configuracoes-nfse");
+
+  const main = read("frontend/src/main.tsx");
+  assert.match(main, /ConfiguracaoNfsePage/);
+  const form = read("frontend/src/ConfiguracaoNfsePage.tsx");
+  for (const tab of ["Geral", "Endereço padrão", "API"]) assert.match(form, new RegExp(tab));
+  assert.match(form, /Sincronizar listas Omie/);
+});
+
+test("Omie reference lists are declared and selectable configuration uses refs", () => {
+  const mapping = read("backend/src/mappings/omie.js");
+  for (const call of ["ListarCadastroServico", "ListarCategorias", "ListarContasCorrentes", "ListarFormasPagVendas", "PesquisarCidades"]) {
+    assert.match(mapping, new RegExp(call));
+  }
+  const model = read("backend/src/models/ConfiguracaoNfse.js");
+  for (const ref of ["ServicoOmie", "CategoriaOmie", "ContaCorrenteOmie", "CondicaoPagamentoOmie", "CidadeOmie"]) {
+    assert.match(model, new RegExp(`fields\\.ref\\("${ref}"`));
+  }
+});
+
 test("implementation never calls automatic Omie cancellation", () => {
   const sources = walk(path.join(root, "backend/src")).map((file) => fs.readFileSync(file, "utf8")).join("\n");
   assert.doesNotMatch(sources, /callOmie\(["']cancel/i);

@@ -11,13 +11,21 @@ defineModel({
   schema: {
     chave: unique(fields.string({ required: true, label: "Configuração", default: "default" })),
     instanceId: fields.string({ required: true, label: "Instância Omie", default: "default" }),
+
+    servicoOmieId: fields.ref("ServicoOmie", { label: "Serviço Omie" }),
     codigoServicoOmie: fields.number({ label: "Código do serviço Omie" }),
-    codigoCategoriaOmie: fields.string({ label: "Categoria Omie" }),
-    codigoContaCorrenteOmie: fields.number({ label: "Conta corrente Omie" }),
+    categoriaOmieId: fields.ref("CategoriaOmie", { label: "Categoria Omie" }),
+    codigoCategoriaOmie: fields.string({ label: "Código da categoria Omie" }),
+    contaCorrenteOmieId: fields.ref("ContaCorrenteOmie", { label: "Conta corrente Omie" }),
+    codigoContaCorrenteOmie: fields.number({ label: "Código da conta corrente Omie" }),
+    cidadePrestacaoServicoId: fields.ref("CidadeOmie", { label: "Cidade da prestação do serviço" }),
     cidadePrestacaoServico: fields.string({ label: "Cidade da prestação do serviço" }),
-    codigoCondicaoPagamento: fields.string({ label: "Condição de pagamento Omie", default: "000" }),
+    condicaoPagamentoOmieId: fields.ref("CondicaoPagamentoOmie", { label: "Condição de pagamento Omie" }),
+    codigoCondicaoPagamento: fields.string({ label: "Código da condição de pagamento Omie", default: "000" }),
+
     enviarLinkNfsePorEmail: fields.boolean({ label: "Enviar link da NFS-e por e-mail pelo Omie", default: false }),
     dadosAdicionaisNf: fields.string({ label: "Dados adicionais da NFS-e" }),
+
     defaultStreet: fields.string({ label: "Logradouro padrão" }),
     defaultNumber: fields.string({ label: "Número padrão" }),
     defaultComplement: fields.string({ label: "Complemento padrão" }),
@@ -27,6 +35,7 @@ defineModel({
     defaultPostalCode: fields.string({ label: "CEP padrão" }),
     defaultCountryCode: fields.string({ label: "Código do país padrão", default: "1058" }),
     allowIssuanceWithoutAddress: fields.boolean({ label: "Permitir emissão sem dados de endereço", default: false }),
+
     callbackUrl: fields.string({ label: "URL de callback da Plataforma" }),
     callbackAuthMode: fields.enum(["none", "bearer", "hmac-sha256"], { label: "Autenticação do callback", default: "hmac-sha256" }),
     callbackSecretEnv: fields.string({ label: "Variável de ambiente do segredo do callback", default: "TACA_CALLBACK_SECRET" }),

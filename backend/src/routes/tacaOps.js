@@ -1,9 +1,11 @@
 "use strict";
 
+const crypto = require("node:crypto");
 const { defineRoutes } = require("@oondemand/oon-core-back");
-const { getConfig } = require("../services/taca/config");
+const { getConfig, updateConfig } = require("../services/taca/config");
 const { OPERATOR_ROLES } = require("../services/taca/constants");
-const { models } = require("../services/taca/runtime");
+const { REFERENCE_LISTS } = require("../services/taca/referenceData");
+const { enqueueIntegration, models } = require("../services/taca/runtime");
 const { confirmReversal, currentUser, enqueueFiscalReconcile, resendOrderCallback, resendReversalCallback } = require("../services/taca/workflow");
 
 function startTodaySaoPaulo(now = new Date()) {
@@ -31,9 +33,105 @@ async function dashboard() {
   return { emissionsToday, issued, processing, errors, callbacksPending: orderCallbacksPending + reversalCallbacksPending, reversalsPending, successRate: terminal ? Math.round((issued / terminal) * 10000) / 100 : 0, averageConfirmationMs: Math.round(Number(avgRows?.[0]?.avg || 0)), throughputLastHour: lastHour, oldestPendingAgeMs: oldestPending?.receivedAt ? Date.now() - new Date(oldestPending.receivedAt).getTime() : 0 };
 }
 
+function option(id, value, label, extra = {}) {
+  return { id: String(id), value: String(value ?? ""), label: String(label ?? value ?? ""), ...extra };
+}
+
+async function configOptions() {
+  const {
+    ServicoOmie,
+    CategoriaOmie,
+    ContaCorrenteOmie,
+    CondicaoPagamentoOmie,
+    CidadeOmie,
+  } = models();
+
+  const [services, categories, currentAccounts, paymentTerms, cities] = await Promise.all([
+    ServicoOmie.find({ status: "Ativo" }).sort({ nome: 1 }).lean(),
+    CategoriaOmie.find({ status: "Ativo", selecionavel: { $ne: false } }).sort({ nome: 1 }).lean(),
+    ContaCorrenteOmie.find({ status: "Ativo" }).sort({ nome: 1 }).lean(),
+    CondicaoPagamentoOmie.find({}).sort({ nome: 1 }).lean(),
+    CidadeOmie.find({}).sort({ uf: 1, nome: 1 }).lean(),
+  ]);
+
+  return {
+    instances: [{ id: "default", value: "default", label: "Omie Taça" }],
+    services: services.map((item) => option(
+      item._id,
+      item.codigoServicoOmie,
+      `${item.codigo ? `${item.codigo} — ` : ""}${item.nome}`,
+      { categoryCode: item.codigoCategoriaOmie || "" },
+    )),
+    categories: categories.map((item) => option(
+      item._id,
+      item.codigoCategoriaOmie,
+      `${item.codigoCategoriaOmie} — ${item.nome}`,
+    )),
+    currentAccounts: currentAccounts.map((item) => option(
+      item._id,
+      item.codigoContaCorrenteOmie,
+      `${item.nome} (${item.codigoContaCorrenteOmie})`,
+    )),
+    paymentTerms: paymentTerms.map((item) => option(
+      item._id,
+      item.codigoCondicaoPagamento,
+      `${item.codigoCondicaoPagamento} — ${item.nome}`,
+    )),
+    cities: cities.map((item) => option(
+      item._id,
+      item.codigoCidadeOmie,
+      `${item.nome}${item.uf ? ` (${item.uf})` : ""}`,
+      { ibgeCode: item.codigoIbge || "", state: item.uf || "" },
+    )),
+  };
+}
+
+async function enqueueReferenceSync() {
+  const config = await getConfig({ create: true });
+  const batch = crypto.randomUUID();
+  const tickets = [];
+  for (const listKey of Object.keys(REFERENCE_LISTS)) {
+    const ticket = await enqueueIntegration({
+      provider: "omie",
+      handler: "TACA_SINCRONIZAR_LISTA_REFERENCIA",
+      resource: "reference-data",
+      operation: `sync-${listKey}`,
+      aggregateType: "ConfiguracaoNfse",
+      aggregateId: String(config._id),
+      idempotencyKey: `taca:reference-data:${listKey}:${batch}`,
+      payload: { listKey, instanceId: config.instanceId || "default" },
+    });
+    tickets.push({ listKey, ticketId: String(ticket?._id || "") });
+  }
+  return { accepted: true, tickets };
+}
+
 defineRoutes("/api/taca/ops", (router) => {
   router.private.get("/dashboard", { roles: OPERATOR_ROLES }, async (_req, res) => res.json(await dashboard()));
-  router.private.post("/config/initialize", { roles: OPERATOR_ROLES }, async (_req, res) => res.json({ config: await getConfig({ create: true }) }));
+
+  router.private.get("/config", { roles: OPERATOR_ROLES }, async (_req, res) => {
+    res.json({ config: await getConfig({ create: true }) });
+  });
+
+  router.private.put("/config", {
+    roles: OPERATOR_ROLES,
+    audit: { action: "UPDATE", entity: "ConfiguracaoNfse" },
+  }, async (req, res) => {
+    res.json({ config: await updateConfig(req.body || {}) });
+  });
+
+  router.private.post("/config/initialize", { roles: OPERATOR_ROLES }, async (_req, res) => {
+    res.json({ config: await getConfig({ create: true }) });
+  });
+
+  router.private.get("/config/options", { roles: OPERATOR_ROLES }, async (_req, res) => {
+    res.json(await configOptions());
+  });
+
+  router.private.post("/config/sync-lists", { roles: OPERATOR_ROLES }, async (_req, res) => {
+    res.status(202).json(await enqueueReferenceSync());
+  });
+
   router.private.post("/orders/:id/reconcile", { roles: OPERATOR_ROLES }, async (req, res) => res.status(202).json(await enqueueFiscalReconcile(req.params.id)));
   router.private.post("/orders/:id/resend-callback", { roles: OPERATOR_ROLES }, async (req, res) => res.status(202).json(await resendOrderCallback(req.params.id)));
   router.private.post("/reversals/:id/confirm", { roles: OPERATOR_ROLES, audit: { action: "UPDATE", entity: "EstornoTaca" } }, async (req, res) => {
@@ -43,4 +141,9 @@ defineRoutes("/api/taca/ops", (router) => {
   router.private.post("/reversals/:id/resend-callback", { roles: OPERATOR_ROLES }, async (req, res) => res.status(202).json(await resendReversalCallback(req.params.id)));
 });
 
-module.exports = { dashboard, startTodaySaoPaulo };
+module.exports = {
+  configOptions,
+  dashboard,
+  enqueueReferenceSync,
+  startTodaySaoPaulo,
+};
