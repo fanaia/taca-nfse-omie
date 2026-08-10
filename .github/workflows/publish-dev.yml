@@ -48,6 +48,8 @@ jobs:
               grep -q 'swagger-ui-bundle.js' "$RUNNER_TEMP/swagger.html"
               grep -q '/api/taca/v1/docs-init.js' "$RUNNER_TEMP/swagger.html"
               grep -q 'SwaggerUIBundle' "$RUNNER_TEMP/docs-init.js"
+              grep -q 'preauthorizeApiKey("bearerAuth", token)' "$RUNNER_TEMP/docs-init.js"
+              grep -q '/api/auth/autenticar' "$RUNNER_TEMP/docs-init.js"
               grep -qi '^content-security-policy:.*script-src' "$RUNNER_TEMP/swagger.headers"
 
               if grep -qi '^content-security-policy:.*script-src[^;]*unsafe-inline' "$RUNNER_TEMP/swagger.headers"; then
@@ -61,7 +63,7 @@ jobs:
               fi
 
               echo "Swagger público disponível em $API_BASE/taca/v1/docs"
-              echo "Bootstrap CSP-safe disponível em $API_BASE/taca/v1/docs-init.js"
+              echo "Bootstrap CSP-safe e bearerAuth automático disponíveis em $API_BASE/taca/v1/docs-init.js"
               echo "OpenAPI público disponível em $API_BASE/taca/v1/openapi.json"
               exit 0
             fi

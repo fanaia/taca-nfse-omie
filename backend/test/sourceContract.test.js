@@ -23,13 +23,20 @@ test("Core packages are pinned exactly to 0.3.74", () => {
   assert.equal(frontend.dependencies["@oondemand/oon-core-front"], "0.3.74");
 });
 
-test("public API contract stays English and protected by Core private routes", () => {
+test("public API contract stays English, authenticated and restricted to Platform access", () => {
   const source = read("backend/src/routes/tacaApi.js");
+  const access = read("backend/src/services/taca/access.js");
+  const constants = read("backend/src/services/taca/constants.js");
+
   assert.match(source, /defineRoutes\("\/taca\/v1"/);
   assert.doesNotMatch(source, /defineRoutes\("\/api\/taca\/v1"/);
   assert.match(source, /router\.private\.post\("\/orders"/);
   assert.match(source, /router\.private\.post\("\/orders\/:integrationCode\/reversal"/);
-  assert.match(source, /PLATFORM_ROLES/);
+  assert.match(source, /assertPlatformAccess\(req\)/);
+  assert.doesNotMatch(source, /roles:\s*PLATFORM_ROLES/);
+  assert.match(access, /PLATFORM_SERVICE_ACCOUNTS/);
+  assert.match(constants, /api-plataforma-taca@email\.com/);
+  assert.match(constants, /"operador"/);
   assert.doesNotMatch(source, /\/pedidos|\/estorno\b/);
 });
 
