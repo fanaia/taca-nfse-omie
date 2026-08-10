@@ -4,19 +4,19 @@ Side-Car Omie da Plataforma Taça para receber pagamentos confirmados, emitir NF
 
 ## Documentação pública da API
 
-A publicação da Central usa hosts separados para frontend e backend. No ambiente de desenvolvimento:
+No ambiente de desenvolvimento, a API pública deve ser consumida pelo mesmo hostname público da Central, usando o prefixo `/api`:
 
-- Frontend: `https://taca-nfse-omie-dev.central.oondemand.online`
-- API pública: `https://api-taca-nfse-omie-dev.central.oondemand.online/api`
-- Swagger UI: `https://api-taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/docs`
-- OpenAPI JSON: `https://api-taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/openapi.json`
+- Central: `https://taca-nfse-omie-dev.central.oondemand.online`
+- API pública: `https://taca-nfse-omie-dev.central.oondemand.online/api`
+- Swagger UI: `https://taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/docs`
+- OpenAPI JSON: `https://taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/openapi.json`
 
-A documentação fica disponível no próprio backend, sem exigir login:
+A documentação fica disponível sem exigir login:
 
 - `GET /api/taca/v1/docs` — Swagger UI interativo;
 - `GET /api/taca/v1/openapi.json` — contrato OpenAPI 3.0.3 em JSON.
 
-> O host do frontend não deve ser usado como base da API. Integrações externas devem usar o host `api-*` publicado pela Central de Ativações.
+O hostname dedicado `api-*` pode existir como endereço técnico de backend, mas não é necessário para a integração pública da Plataforma. O contrato externo canônico usa o hostname público da Central com `/api`, reduzindo dependência de DNS adicional e mantendo o mesmo padrão utilizado pelo runtime OonCore.
 
 O Swagger documenta o fluxo completo da Plataforma:
 
