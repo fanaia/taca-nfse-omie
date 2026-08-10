@@ -4,14 +4,23 @@ Side-Car Omie da Plataforma Taça para receber pagamentos confirmados, emitir NF
 
 ## Documentação pública da API
 
-Após a publicação da Central, a documentação de integração fica disponível no próprio backend, sem exigir login:
+A publicação da Central usa hosts separados para frontend e backend. No ambiente de desenvolvimento:
+
+- Frontend: `https://taca-nfse-omie-dev.central.oondemand.online`
+- API pública: `https://api-taca-nfse-omie-dev.central.oondemand.online/api`
+- Swagger UI: `https://api-taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/docs`
+- OpenAPI JSON: `https://api-taca-nfse-omie-dev.central.oondemand.online/api/taca/v1/openapi.json`
+
+A documentação fica disponível no próprio backend, sem exigir login:
 
 - `GET /api/taca/v1/docs` — Swagger UI interativo;
 - `GET /api/taca/v1/openapi.json` — contrato OpenAPI 3.0.3 em JSON.
 
+> O host do frontend não deve ser usado como base da API. Integrações externas devem usar o host `api-*` publicado pela Central de Ativações.
+
 O Swagger documenta o fluxo completo da Plataforma:
 
-1. `POST /auth/autenticar` com HTTP Basic Auth para obter o token do usuário dedicado `integracao-taca`;
+1. `POST /api/auth/autenticar` com HTTP Basic Auth para obter o token do usuário dedicado `integracao-taca`;
 2. uso do token como `Authorization: Bearer <token>` nas operações da API;
 3. `POST /api/taca/v1/orders` para gerar o pedido de emissão;
 4. `POST /api/taca/v1/orders/{integrationCode}/reversal` para solicitar o estorno manual.
