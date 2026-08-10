@@ -42,3 +42,12 @@ test("Swagger bootstrap is same-origin and compatible with the restrictive CSP",
   assert.match(routeSource, /object-src 'none'/);
   assert.match(routeSource, /frame-ancestors 'none'/);
 });
+
+test("Swagger promotes a successful Basic authentication response to bearerAuth", () => {
+  const routeSource = fs.readFileSync(path.join(__dirname, "../src/routes/tacaDocs.js"), "utf8");
+
+  assert.match(routeSource, /responseInterceptor:\s*applyAuthenticationToken/);
+  assert.match(routeSource, /\/api\/auth\/autenticar/);
+  assert.match(routeSource, /preauthorizeApiKey\("bearerAuth", token\)/);
+  assert.match(routeSource, /persistAuthorization:\s*true/);
+});
