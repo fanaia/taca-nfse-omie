@@ -10,7 +10,11 @@ function sendError(res, error) {
   res.status(status).json({ error: { code, message: String(error?.message || "Unexpected error."), details: error?.details || undefined } });
 }
 
-defineRoutes("/api/taca/v1", (router) => {
+// O delivery do OonCore publica /api/* no Nginx e remove o prefixo /api
+// antes de encaminhar para o Express (proxy_pass ...:4000/). Portanto o
+// contrato externo /api/taca/v1/* deve ser registrado internamente como
+// /taca/v1/*.
+defineRoutes("/taca/v1", (router) => {
   router.private.post("/orders", { roles: PLATFORM_ROLES }, async (req, res) => {
     try {
       const result = await receiveOrder(req.body || {});
