@@ -10,3 +10,45 @@ jobs:
       contents: read
       id-token: write
     uses: oondemand/oon-publish/.github/workflows/request-dev.yml@main
+
+  smoke-public-api:
+    needs: request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar Swagger e OpenAPI públicos
+        env:
+          API_BASE: https://api-taca-nfse-omie-dev.central.oondemand.online/api
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for attempt in $(seq 1 60); do
+            docs_status="$(curl --silent --show-error --location \
+              --output "$RUNNER_TEMP/swagger.html" \
+              --write-out '%{http_code}' \
+              "$API_BASE/taca/v1/docs" || true)"
+            openapi_status="$(curl --silent --show-error --location \
+              --output "$RUNNER_TEMP/openapi.json" \
+              --write-out '%{http_code}' \
+              "$API_BASE/taca/v1/openapi.json" || true)"
+
+            if [[ "$docs_status" == "200" && "$openapi_status" == "200" ]]; then
+              node - "$RUNNER_TEMP/openapi.json" <<'NODE'
+          const fs = require('node:fs');
+          const spec = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          if (spec.openapi !== '3.0.3') throw new Error('OpenAPI inesperado.');
+          if (!spec.paths?.['/api/auth/autenticar']?.post) throw new Error('Autenticação ausente no OpenAPI.');
+          if (!spec.paths?.['/api/taca/v1/orders']?.post) throw new Error('Endpoint de pedidos ausente no OpenAPI.');
+          NODE
+              grep -q 'SwaggerUIBundle' "$RUNNER_TEMP/swagger.html"
+              echo "Swagger público disponível em $API_BASE/taca/v1/docs"
+              echo "OpenAPI público disponível em $API_BASE/taca/v1/openapi.json"
+              exit 0
+            fi
+
+            echo "Tentativa $attempt/60: docs=$docs_status openapi=$openapi_status"
+            sleep 5
+          done
+
+          echo "Swagger/OpenAPI não ficaram disponíveis após a publicação." >&2
+          exit 1
