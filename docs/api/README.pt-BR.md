@@ -15,13 +15,13 @@ Integrações externas devem usar o host `api-*`; o host do frontend não é a b
 
 ## 1. Autenticação
 
-A Plataforma deve usar um usuário dedicado da Central com a role `integracao-taca`, criado no OonCore e sem uso humano compartilhado. O token/sessão segue o mecanismo padrão de autenticação do OonCore 0.3.74.
+A Plataforma deve usar um usuário dedicado da Central com o perfil RBAC `Canal de Vendas (plataforma)` (`canal-vendas`), criado no OonCore e sem uso humano compartilhado. O token/sessão segue o mecanismo padrão de autenticação do OonCore 0.3.75.
 
 - guardar a credencial fora do código-fonte;
 - rotacionar a credencial pelo processo padrão de usuários do OonCore;
-- não atribuir `admin`/`desenvolvedor` ao usuário da Plataforma;
+- não atribuir os perfis `Administrador` ou `Operador` ao usuário da Plataforma;
 - ausência de autenticação retorna `401` pelo Core;
-- usuário autenticado sem role permitida retorna `403` pelo Core.
+- usuário autenticado sem a permissão RBAC exigida retorna `403` pelo Core.
 
 A autenticação pública é feita em `POST /api/auth/autenticar` usando HTTP Basic Auth. O token retornado deve ser enviado como `Authorization: Bearer <token>` nas operações da Taça.
 

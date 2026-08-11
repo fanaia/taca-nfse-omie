@@ -4,13 +4,13 @@ This document defines the external contract used by the Taca Platform. Endpoints
 
 ## 1. Authentication
 
-The Platform must use a dedicated OonCore user with role `integracao-taca`. Do not reuse a human account. Token/session handling follows the standard OonCore 0.3.74 authentication flow.
+The Platform must use a dedicated OonCore user with the `Canal de Vendas (plataforma)` RBAC profile (`canal-vendas`). Do not reuse a human account. Token/session handling follows the standard OonCore 0.3.75 authentication flow.
 
 - keep credentials outside source control;
 - rotate credentials through the standard OonCore user process;
-- do not grant `admin` or `desenvolvedor` to the Platform account;
+- do not grant the `Administrador` or `Operador` profiles to the Platform account;
 - missing authentication is rejected with `401` by the Core;
-- an authenticated user without an allowed role is rejected with `403` by the Core.
+- an authenticated user without the required RBAC permission is rejected with `403` by the Core.
 
 ## 2. Submit an order
 
