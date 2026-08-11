@@ -73,14 +73,19 @@ async function synchronizeCustomer(order, config, context = {}) {
   }
 
   try {
+    const payload = omieCustomerPayload(order, config);
+    const callKey = existingCode > 0 ? "update-customer" : "include-customer";
+    if (existingCode > 0) payload.codigo_cliente_omie = existingCode;
+
     const result = await callOmie(
-      "upsert-customer-by-document",
+      callKey,
       config.instanceId,
-      omieCustomerPayload(order, config),
+      payload,
       context,
     );
     const code = customerCode(result) || existingCode;
-    if (!(code > 0)) throw new Error("Omie não retornou codigo_cliente_omie no UpsertClienteCpfCnpj.");
+    const method = existingCode > 0 ? "AlterarCliente" : "IncluirCliente";
+    if (!(code > 0)) throw new Error(`Omie não retornou codigo_cliente_omie no ${method}.`);
 
     const now = new Date();
     await ClienteTaca.findByIdAndUpdate(customer._id, {
