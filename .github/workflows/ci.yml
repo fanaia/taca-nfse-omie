@@ -36,4 +36,4 @@ jobs:
         run: npm run build
       - name: Core pin guard
         run: |
-          node -e "const b=require('./backend/package.json'),f=require('./frontend/package.json'); if(b.dependencies['@oondemand/oon-core-back']!=='0.3.74'||f.dependencies['@oondemand/oon-core-front']!=='0.3.74') process.exit(1)"
+          node -e "const b=require('./backend/package.json'),f=require('./frontend/package.json'); if(b.dependencies['@oondemand/oon-core-back']!=='0.3.75'||f.dependencies['@oondemand/oon-core-front']!=='0.3.75') process.exit(1)"
