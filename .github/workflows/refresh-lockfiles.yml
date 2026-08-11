@@ -1,0 +1,35 @@
+name: refresh-lockfiles
+
+on:
+  push:
+    branches: [agent/core-0.3.75-rbac]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/core-0.3.75-rbac
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - name: Refresh backend lockfile
+        working-directory: backend
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Refresh frontend lockfile
+        working-directory: frontend
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Commit lockfiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/package-lock.json frontend/package-lock.json
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: refresh Core 0.3.75 lockfiles"
+          git push
