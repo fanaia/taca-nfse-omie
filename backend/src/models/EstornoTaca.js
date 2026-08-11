@@ -1,7 +1,7 @@
 "use strict";
 
 const { defineModel, fields } = require("@oondemand/oon-core-back");
-const { REVERSAL_STAGES } = require("../services/taca/constants");
+const { REVERSAL_STAGES, TACA_PERMISSIONS } = require("../services/taca/constants");
 function indexed(descriptor) { descriptor.index = true; return descriptor; }
 function unique(descriptor) { descriptor.unique = true; descriptor.index = true; return descriptor; }
 
@@ -32,7 +32,14 @@ defineModel({
     callbackSentAt: fields.date({ label: "Callback enviado em" }),
     completedAt: indexed(fields.date({ label: "Concluído em" })),
   },
-  crud: { enabled: true, roles: { write: ["admin", "desenvolvedor"] }, populateRefs: true },
+  crud: {
+    enabled: true,
+    permissions: {
+      read: TACA_PERMISSIONS.OPERATION_READ,
+      write: TACA_PERMISSIONS.DATA_WRITE,
+    },
+    populateRefs: true,
+  },
 });
 
 module.exports = {};
