@@ -20,16 +20,17 @@ O hostname dedicado `api-*` pode existir como endereço técnico de backend, mas
 
 O Swagger documenta o fluxo completo da Plataforma:
 
-1. `POST /api/auth/autenticar` com HTTP Basic Auth para obter o token do usuário dedicado `integracao-taca`;
+1. `POST /api/auth/autenticar` com HTTP Basic Auth para obter o token do usuário dedicado com perfil RBAC `Canal de Vendas (plataforma)` (`canal-vendas`);
 2. uso do token como `Authorization: Bearer <token>` nas operações da API;
 3. `POST /api/taca/v1/orders` para gerar o pedido de emissão;
 4. `POST /api/taca/v1/orders/{integrationCode}/reversal` para solicitar o estorno manual.
 
-A documentação é pública; os endpoints de negócio continuam protegidos pelo OonCore e pela role da Plataforma.
+A documentação é pública; os endpoints de negócio continuam protegidos pelo OonCore e pelas permissões RBAC da Plataforma.
 
 ## Contratos principais
 
-- Core backend/frontend fixos em `0.3.74`;
+- Core backend/frontend fixos em `0.3.75`;
+- RBAC com `Administrador`, `Operador` e `Canal de Vendas (plataforma)`;
 - `POST /api/taca/v1/orders` — entrada idempotente;
 - `POST /api/taca/v1/orders/{integrationCode}/reversal` — solicitação idempotente de estorno manual;
 - cliente único por CPF/CNPJ normalizado;
