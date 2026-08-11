@@ -15,5 +15,12 @@ test("customer stage handler treats SOAP client faults as definitive", () => {
 test("customer stage handler skips Omie only when fingerprints match", () => {
   assert.match(source, /syncedFingerprint === currentFingerprint/);
   assert.match(source, /customerSyncSkipped: sync\.skipped/);
-  assert.match(source, /UpsertClienteCpfCnpj/);
+});
+
+test("customer stage handler uses include for new customers and update for known customers", () => {
+  assert.match(source, /update-customer/);
+  assert.match(source, /include-customer/);
+  assert.match(source, /codigo_cliente_omie/);
+  assert.match(source, /AlterarCliente/);
+  assert.match(source, /IncluirCliente/);
 });
