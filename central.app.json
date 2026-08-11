@@ -15,6 +15,38 @@
     "currencies": false
   },
   "capabilities": ["core.collections", "core.integrations", "core.integrations.omie"],
-  "compatibility": { "core": { "minVersion": "0.3.74", "maxVersionExclusive": "0.3.75" } },
-  "activation": { "enabled": true, "configurationVersion": 1, "fields": [] }
+  "compatibility": { "core": { "minVersion": "0.3.75", "maxVersionExclusive": "0.3.76" } },
+  "activation": { "enabled": true, "configurationVersion": 1, "fields": [] },
+  "rbac": {
+    "invitationTtlHours": 72,
+    "permissions": [
+      "taca.operation.read",
+      "taca.operation.execute",
+      "taca.configuration.manage",
+      "taca.data.write",
+      "taca.platform.orders.create",
+      "taca.platform.reversals.create"
+    ],
+    "roles": [
+      {
+        "code": "admin",
+        "name": "Administrador",
+        "description": "Acesso total à Central, configurações, usuários e operação.",
+        "admin": true,
+        "permissions": ["*"]
+      },
+      {
+        "code": "operador",
+        "name": "Operador",
+        "description": "Consulta a operação e executa as etapas manuais das esteiras.",
+        "permissions": ["taca.operation.read", "taca.operation.execute"]
+      },
+      {
+        "code": "canal-vendas",
+        "name": "Canal de Vendas (plataforma)",
+        "description": "Perfil técnico da plataforma Taça, restrito à criação e ao estorno de pedidos via API.",
+        "permissions": ["taca.platform.orders.create", "taca.platform.reversals.create"]
+      }
+    ]
+  }
 }
