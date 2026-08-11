@@ -1,7 +1,7 @@
 "use strict";
 
 const { defineRoutes } = require("@oondemand/oon-core-back");
-const { assertPlatformAccess } = require("../services/taca/access");
+const { TACA_PERMISSIONS } = require("../services/taca/constants");
 const {
   currentUser,
   externalOrder,
@@ -29,33 +29,36 @@ function sendError(res, error) {
 // contrato externo /api/taca/v1/* deve ser registrado internamente como
 // /taca/v1/*.
 defineRoutes("/taca/v1", (router) => {
-  // A rota permanece privada (Bearer obrigatório). A autorização específica da
-  // conta de serviço é aplicada no handler porque o RBAC nativo do OonCore usa
-  // apenas perfis de app e não suporta a role customizada "integracao-taca".
-  router.private.post("/orders", async (req, res) => {
-    try {
-      assertPlatformAccess(req);
-      const result = await receiveOrder(req.body || {});
-      res.status(result.created ? 202 : 200).json(externalOrder(result.order));
-    } catch (error) {
-      sendError(res, error);
-    }
-  });
+  router.private.post(
+    "/orders",
+    { permission: TACA_PERMISSIONS.PLATFORM_ORDER_CREATE },
+    async (req, res) => {
+      try {
+        const result = await receiveOrder(req.body || {});
+        res.status(result.created ? 202 : 200).json(externalOrder(result.order));
+      } catch (error) {
+        sendError(res, error);
+      }
+    },
+  );
 
-  router.private.post("/orders/:integrationCode/reversal", async (req, res) => {
-    try {
-      assertPlatformAccess(req);
-      const result = await requestReversal(
-        req.params.integrationCode,
-        currentUser(req),
-      );
-      res
-        .status(result.created ? 202 : 200)
-        .json(externalReversal(result.reversal));
-    } catch (error) {
-      sendError(res, error);
-    }
-  });
+  router.private.post(
+    "/orders/:integrationCode/reversal",
+    { permission: TACA_PERMISSIONS.PLATFORM_REVERSAL_CREATE },
+    async (req, res) => {
+      try {
+        const result = await requestReversal(
+          req.params.integrationCode,
+          currentUser(req),
+        );
+        res
+          .status(result.created ? 202 : 200)
+          .json(externalReversal(result.reversal));
+      } catch (error) {
+        sendError(res, error);
+      }
+    },
+  );
 });
 
 module.exports = { sendError };

@@ -56,35 +56,23 @@ const REVERSAL_STATUS = Object.freeze({
   COMPLETED: "CONCLUIDO",
 });
 
-// O OonCore recebe da Central de Ativações perfis nativos do app. "operador"
-// é o perfil recomendado para contas de integração; "integracao-taca" fica
-// aceito por compatibilidade caso uma instalação use um verificador customizado.
-const PLATFORM_ROLES = Object.freeze([
-  "integracao-taca",
-  "operador",
-  "desenvolvedor",
-]);
-
-// Conta de serviço oficial da Plataforma Taça. A autorização por identidade
-// garante que a conta dedicada continue funcional mesmo se sua permissão de app
-// estiver com o perfil padrão "leitura", sem liberar o endpoint para todos os
-// usuários de leitura.
-const PLATFORM_SERVICE_ACCOUNTS = Object.freeze([
-  "api-plataforma-taca@email.com",
-]);
-
-const OPERATOR_ROLES = Object.freeze(["admin", "desenvolvedor"]);
+const TACA_PERMISSIONS = Object.freeze({
+  OPERATION_READ: "taca.operation.read",
+  OPERATION_EXECUTE: "taca.operation.execute",
+  CONFIGURATION_MANAGE: "taca.configuration.manage",
+  DATA_WRITE: "taca.data.write",
+  PLATFORM_ORDER_CREATE: "taca.platform.orders.create",
+  PLATFORM_REVERSAL_CREATE: "taca.platform.reversals.create",
+});
 
 module.exports = {
   CALLBACK_STATUS,
   EXTERNAL_STATUS,
   INTERNAL_STATUS,
-  OPERATOR_ROLES,
   ORDER_STAGE,
   ORDER_STAGES,
-  PLATFORM_ROLES,
-  PLATFORM_SERVICE_ACCOUNTS,
   REVERSAL_STAGE,
   REVERSAL_STAGES,
   REVERSAL_STATUS,
+  TACA_PERMISSIONS,
 };

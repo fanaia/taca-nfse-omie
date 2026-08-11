@@ -16,27 +16,26 @@ function walk(dir) {
   return values;
 }
 
-test("Core packages are pinned exactly to 0.3.74", () => {
+test("Core packages are pinned exactly to 0.3.75", () => {
   const backend = JSON.parse(read("backend/package.json"));
   const frontend = JSON.parse(read("frontend/package.json"));
-  assert.equal(backend.dependencies["@oondemand/oon-core-back"], "0.3.74");
-  assert.equal(frontend.dependencies["@oondemand/oon-core-front"], "0.3.74");
+  assert.equal(backend.dependencies["@oondemand/oon-core-back"], "0.3.75");
+  assert.equal(frontend.dependencies["@oondemand/oon-core-front"], "0.3.75");
 });
 
-test("public API contract stays English, authenticated and restricted to Platform access", () => {
+test("public API contract stays English, authenticated and restricted by RBAC", () => {
   const source = read("backend/src/routes/tacaApi.js");
-  const access = read("backend/src/services/taca/access.js");
   const constants = read("backend/src/services/taca/constants.js");
 
   assert.match(source, /defineRoutes\("\/taca\/v1"/);
   assert.doesNotMatch(source, /defineRoutes\("\/api\/taca\/v1"/);
-  assert.match(source, /router\.private\.post\("\/orders"/);
-  assert.match(source, /router\.private\.post\("\/orders\/:integrationCode\/reversal"/);
-  assert.match(source, /assertPlatformAccess\(req\)/);
-  assert.doesNotMatch(source, /roles:\s*PLATFORM_ROLES/);
-  assert.match(access, /PLATFORM_SERVICE_ACCOUNTS/);
-  assert.match(constants, /api-plataforma-taca@email\.com/);
-  assert.match(constants, /"operador"/);
+  assert.match(source, /router\.private\.post\(\s*"\/orders"/);
+  assert.match(source, /router\.private\.post\(\s*"\/orders\/:integrationCode\/reversal"/);
+  assert.match(source, /TACA_PERMISSIONS\.PLATFORM_ORDER_CREATE/);
+  assert.match(source, /TACA_PERMISSIONS\.PLATFORM_REVERSAL_CREATE/);
+  assert.doesNotMatch(source, /assertPlatformAccess|PLATFORM_SERVICE_ACCOUNTS|PLATFORM_ROLES/);
+  assert.match(constants, /taca\.platform\.orders\.create/);
+  assert.match(constants, /taca\.platform\.reversals\.create/);
   assert.doesNotMatch(source, /\/pedidos|\/estorno\b/);
 });
 

@@ -1,6 +1,7 @@
 "use strict";
 
 const { defineModel, fields } = require("@oondemand/oon-core-back");
+const { TACA_PERMISSIONS } = require("../services/taca/constants");
 
 function unique(descriptor) { descriptor.unique = true; descriptor.index = true; return descriptor; }
 
@@ -53,7 +54,14 @@ defineModel({
     fiscalCheckAttempts: fields.number({ label: "Consultas fiscais por Ticket", default: 3 }),
     fiscalCheckBackoffMs: fields.number({ label: "Backoff inicial da confirmação fiscal (ms)", default: 1000 }),
   },
-  crud: { enabled: true, roles: { write: ["admin", "desenvolvedor"] }, populateRefs: true },
+  crud: {
+    enabled: true,
+    permissions: {
+      read: TACA_PERMISSIONS.CONFIGURATION_MANAGE,
+      write: TACA_PERMISSIONS.CONFIGURATION_MANAGE,
+    },
+    populateRefs: true,
+  },
 });
 
 module.exports = {};

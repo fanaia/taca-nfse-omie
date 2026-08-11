@@ -3,7 +3,7 @@
 const crypto = require("node:crypto");
 const { defineRoutes } = require("@oondemand/oon-core-back");
 const { getConfig, updateConfig } = require("../services/taca/config");
-const { OPERATOR_ROLES } = require("../services/taca/constants");
+const { TACA_PERMISSIONS } = require("../services/taca/constants");
 const { REFERENCE_LISTS } = require("../services/taca/referenceData");
 const { enqueueIntegration, models } = require("../services/taca/runtime");
 const {
@@ -89,46 +89,91 @@ async function enqueueReferenceSync() {
 }
 
 defineRoutes("/api/taca/ops", (router) => {
-  router.private.get("/dashboard", { roles: OPERATOR_ROLES }, async (_req, res) => res.json(await dashboard()));
+  router.private.get(
+    "/dashboard",
+    { permission: TACA_PERMISSIONS.OPERATION_READ },
+    async (_req, res) => res.json(await dashboard()),
+  );
 
-  router.private.get("/config", { roles: OPERATOR_ROLES }, async (_req, res) => {
-    res.json({ config: await getConfig({ create: true }) });
-  });
+  router.private.get(
+    "/config",
+    { permission: TACA_PERMISSIONS.CONFIGURATION_MANAGE },
+    async (_req, res) => {
+      res.json({ config: await getConfig({ create: true }) });
+    },
+  );
 
   router.private.put("/config", {
-    roles: OPERATOR_ROLES,
+    permission: TACA_PERMISSIONS.CONFIGURATION_MANAGE,
     audit: { action: "UPDATE", entity: "ConfiguracaoNfse" },
   }, async (req, res) => {
     res.json({ config: await updateConfig(req.body || {}) });
   });
 
-  router.private.post("/config/initialize", { roles: OPERATOR_ROLES }, async (_req, res) => {
-    res.json({ config: await getConfig({ create: true }) });
-  });
+  router.private.post(
+    "/config/initialize",
+    { permission: TACA_PERMISSIONS.CONFIGURATION_MANAGE },
+    async (_req, res) => {
+      res.json({ config: await getConfig({ create: true }) });
+    },
+  );
 
-  router.private.get("/config/options", { roles: OPERATOR_ROLES }, async (_req, res) => {
-    res.json(await configOptions());
-  });
+  router.private.get(
+    "/config/options",
+    { permission: TACA_PERMISSIONS.CONFIGURATION_MANAGE },
+    async (_req, res) => {
+      res.json(await configOptions());
+    },
+  );
 
-  router.private.post("/config/sync-lists", { roles: OPERATOR_ROLES }, async (_req, res) => {
-    res.status(202).json(await enqueueReferenceSync());
-  });
+  router.private.post(
+    "/config/sync-lists",
+    { permission: TACA_PERMISSIONS.CONFIGURATION_MANAGE },
+    async (_req, res) => {
+      res.status(202).json(await enqueueReferenceSync());
+    },
+  );
 
-  router.private.post("/orders/:id/advance", { roles: OPERATOR_ROLES, audit: { action: "UPDATE", entity: "PedidoNfse" } }, async (req, res) => {
+  router.private.post("/orders/:id/advance", {
+    permission: TACA_PERMISSIONS.OPERATION_EXECUTE,
+    audit: { action: "UPDATE", entity: "PedidoNfse" },
+  }, async (req, res) => {
     res.status(202).json(await enqueueOrderStage(req.params.id, { source: "manual", user: currentUser(req) }));
   });
-  router.private.post("/orders/:id/reconcile", { roles: OPERATOR_ROLES }, async (req, res) => res.status(202).json(await enqueueFiscalReconcile(req.params.id)));
-  router.private.post("/orders/:id/resend-callback", { roles: OPERATOR_ROLES }, async (req, res) => res.status(202).json(await resendOrderCallback(req.params.id)));
 
-  router.private.post("/reversals/:id/advance", { roles: OPERATOR_ROLES, audit: { action: "UPDATE", entity: "EstornoTaca" } }, async (req, res) => {
+  router.private.post(
+    "/orders/:id/reconcile",
+    { permission: TACA_PERMISSIONS.OPERATION_EXECUTE },
+    async (req, res) => res.status(202).json(await enqueueFiscalReconcile(req.params.id)),
+  );
+
+  router.private.post(
+    "/orders/:id/resend-callback",
+    { permission: TACA_PERMISSIONS.OPERATION_EXECUTE },
+    async (req, res) => res.status(202).json(await resendOrderCallback(req.params.id)),
+  );
+
+  router.private.post("/reversals/:id/advance", {
+    permission: TACA_PERMISSIONS.OPERATION_EXECUTE,
+    audit: { action: "UPDATE", entity: "EstornoTaca" },
+  }, async (req, res) => {
     const reversal = await advanceReversal(req.params.id, { user: currentUser(req), note: req.body?.note });
     res.json({ id: String(reversal._id), integrationCode: reversal.integrationCode, status: reversal.externalStatus, stage: reversal.etapa });
   });
-  router.private.post("/reversals/:id/confirm", { roles: OPERATOR_ROLES, audit: { action: "UPDATE", entity: "EstornoTaca" } }, async (req, res) => {
+
+  router.private.post("/reversals/:id/confirm", {
+    permission: TACA_PERMISSIONS.OPERATION_EXECUTE,
+    audit: { action: "UPDATE", entity: "EstornoTaca" },
+  }, async (req, res) => {
     const reversal = await confirmReversal(req.params.id, { user: currentUser(req), note: req.body?.note });
     res.json({ id: String(reversal._id), integrationCode: reversal.integrationCode, status: reversal.externalStatus, stage: reversal.etapa });
   });
-  router.private.post("/reversals/:id/resend-callback", { roles: OPERATOR_ROLES }, async (req, res) => res.status(202).json(await resendReversalCallback(req.params.id)));
+
+  router.private.post(
+    "/reversals/:id/resend-callback",
+    { permission: TACA_PERMISSIONS.OPERATION_EXECUTE },
+    async (req, res) => res.status(202).json(await resendReversalCallback(req.params.id)),
+  );
 });
 
 module.exports = { configOptions, dashboard, enqueueReferenceSync, startTodaySaoPaulo };
