@@ -25,11 +25,17 @@ jobs:
       - name: Refresh frontend lockfile
         working-directory: frontend
         run: npm install --package-lock-only --ignore-scripts
-      - name: Commit lockfiles
+      - name: Install root tooling
+        run: npm install --ignore-scripts
+      - name: Sync OonCore documentation cache
+        run: npm run ooncore:docs
+      - name: Validate OonCore conformance
+        run: npm run ooncore:conformance
+      - name: Commit generated artifacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add backend/package-lock.json frontend/package-lock.json
+          git add package-lock.json backend/package-lock.json frontend/package-lock.json .ooncore
           git diff --cached --quiet && exit 0
-          git commit -m "chore: refresh Core 0.3.75 lockfiles"
+          git commit -m "chore: sync OonCore 0.3.75 artifacts"
           git push
