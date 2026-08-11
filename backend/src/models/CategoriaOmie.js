@@ -1,6 +1,7 @@
 "use strict";
 
 const { defineModel, fields } = require("@oondemand/oon-core-back");
+const { TACA_PERMISSIONS } = require("../services/taca/constants");
 
 function indexed(descriptor) { descriptor.index = true; return descriptor; }
 function unique(descriptor) { descriptor.unique = true; descriptor.index = true; return descriptor; }
@@ -19,7 +20,13 @@ defineModel({
     selecionavel: indexed(fields.boolean({ label: "Disponível para seleção", default: true })),
     ultimaSincronizacaoEm: fields.date({ label: "Última sincronização" }),
   },
-  crud: { enabled: true, roles: { write: ["admin", "desenvolvedor"] } },
+  crud: {
+    enabled: true,
+    permissions: {
+      read: TACA_PERMISSIONS.CONFIGURATION_MANAGE,
+      write: TACA_PERMISSIONS.CONFIGURATION_MANAGE,
+    },
+  },
 });
 
 module.exports = {};
