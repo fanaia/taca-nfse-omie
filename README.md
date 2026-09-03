@@ -45,6 +45,10 @@ Documentação da integração no repositório:
 - `docs/api/README.en.md`
 - `docs/api/openapi.yaml`
 
+## Publicação em Dev
+
+O push para `main` publica automaticamente no ambiente Dev. Para testar uma feature antes do merge, abra **Actions → publish-dev → Run workflow** e selecione a branch desejada. A execução manual atualiza o mesmo Dev compartilhado do App; releases de feature branch não podem ser promovidas até a publicação correspondente pela branch padrão.
+
 ## Desenvolvimento
 
 ```bash
